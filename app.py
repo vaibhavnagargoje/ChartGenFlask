@@ -354,10 +354,15 @@ def generate_chart():
 
 # Helper function to generate colors for pie/doughnut charts
 def generate_colors(count):
+    # Use a predefined color palette for better visual appeal
+    color_palette = [
+        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+        '#6f42c1', '#5a5c69', '#858796', '#4287f5', '#41e169'
+    ]
+    
     colors = []
     for i in range(count):
-        hue = (i * 137.5) % 360  # Use golden ratio for better color distribution
-        colors.append(f'hsl({hue}, 70%, 60%)')
+        colors.append(color_palette[i % len(color_palette)])
     return colors
 
 # Helper function to calculate percentage data for stacked bar charts
