@@ -587,29 +587,76 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
             
-            // Convert data to percentages
-            const datasets = config.data.datasets;
-            const labels = config.data.labels;
+            // Store original data for recalculation
+            const originalData = JSON.parse(JSON.stringify(chartData));
             
-            // Calculate totals for each label
-            const totals = Array(labels.length).fill(0);
+            // Add custom plugin to handle legend click for percentage stacked bar
+            const percentageRecalculationPlugin = {
+                id: 'percentageRecalculation',
+                beforeInit: function(chart) {
+                    // Save the original data
+                    chart.originalData = originalData;
+                    
+                    // Override the legend click handler
+                    const originalLegendOnClick = Chart.defaults.plugins.legend.onClick;
+                    Chart.defaults.plugins.legend.onClick = function(e, legendItem, legend) {
+                        // Call the original handler to toggle visibility
+                        originalLegendOnClick.call(this, e, legendItem, legend);
+                        
+                        // For percentage stacked bar, recalculate percentages
+                        if (selectedChartType === 'percentStackedBar') {
+                            recalculatePercentages(chart);
+                        }
+                    };
+                }
+            };
             
-            datasets.forEach(dataset => {
-                dataset.data.forEach((value, index) => {
-                    totals[index] += value;
-                });
-            });
-            
-            // Convert values to percentages
-            datasets.forEach(dataset => {
-                dataset.data = dataset.data.map((value, index) => {
-                    return totals[index] ? (value / totals[index] * 100) : 0;
-                });
-            });
+            // Add the plugin to config
+            if (!config.plugins) {
+                config.plugins = [];
+            }
+            config.plugins.push(percentageRecalculationPlugin);
         }
         
         // Create the chart
         currentChart = new Chart(chartCanvas, config);
+        
+        // Store original data for recalculation when needed
+        if (chartType === 'percentStackedBar') {
+            currentChart.originalData = JSON.parse(JSON.stringify(chartData));
+        }
+    }
+    
+    // Add function to recalculate percentages when toggling legend items
+    function recalculatePercentages(chart) {
+        // Get indices of visible datasets
+        const visibleDatasets = [];
+        chart.data.datasets.forEach((dataset, index) => {
+            if (!chart.getDatasetMeta(index).hidden) {
+                visibleDatasets.push(index);
+            }
+        });
+        
+        // Calculate totals for each data point using only visible datasets
+        const totals = Array(chart.data.labels.length).fill(0);
+        visibleDatasets.forEach(datasetIndex => {
+            const dataset = chart.data.datasets[datasetIndex];
+            dataset.data.forEach((value, index) => {
+                totals[index] += Math.abs(parseFloat(value) || 0);
+            });
+        });
+        
+        // Update percentages for visible datasets
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (!meta.hidden) {
+                dataset.data = dataset.data.map((value, index) => {
+                    return totals[index] ? (Math.abs(parseFloat(value) || 0) / totals[index]) * 100 : 0;
+                });
+            }
+        });
+        
+        chart.update();
     }
     
     // Map chart types to Chart.js types
@@ -676,6 +723,16 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingMessage.textContent = 'Updating chart...';
         document.body.appendChild(loadingMessage);
         
+        // Get visible datasets
+        const visibleDatasets = [];
+        if (currentChart && selectedChartType === 'percentStackedBar') {
+            currentChart.data.datasets.forEach((dataset, index) => {
+                if (!currentChart.getDatasetMeta(index).hidden) {
+                    visibleDatasets.push(index);
+                }
+            });
+        }
+        
         // Send request to apply filter
         fetch('/apply_chart_filter', {
             method: 'POST',
@@ -698,7 +755,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 filterColumn: filterColumnSelect.value,
                 filterValue: filterValueSelect.value,
                 chartFilterColumn: filterColumn2Select.value,
-                chartFilterValue: filterValue
+                chartFilterValue: filterValue,
+                visibleDatasets: visibleDatasets // Pass visible datasets for percentage calculation
             })
         })
         .then(response => response.json())
@@ -709,6 +767,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 // Update chart with filtered data
                 updateChart(data.chartData);
+                
+                // If it's a percentage stacked bar and we have hidden datasets, recalculate
+                if (selectedChartType === 'percentStackedBar' && currentChart) {
+                    // Store updated original data
+                    currentChart.originalData = JSON.parse(JSON.stringify(data.chartData));
+                    
+                    // Apply visibility from current chart to new data
+                    currentChart.data.datasets.forEach((dataset, index) => {
+                        const meta = currentChart.getDatasetMeta(index);
+                        meta.hidden = meta.hidden || false; // Ensure value is defined
+                    });
+                    
+                    // Recalculate percentages based on visible datasets
+                    recalculatePercentages(currentChart);
+                }
             } else {
                 alert('Error applying filter: ' + data.error);
             }
@@ -730,7 +803,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update each dataset
         for (let i = 0; i < chartData.datasets.length; i++) {
             if (i < currentChart.data.datasets.length) {
+                // Preserve hidden state
+                const wasHidden = currentChart.getDatasetMeta(i).hidden;
+                
+                // Update data
                 currentChart.data.datasets[i].data = chartData.datasets[i].data;
+                
+                // Restore hidden state
+                currentChart.getDatasetMeta(i).hidden = wasHidden;
             }
         }
         

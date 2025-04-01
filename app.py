@@ -366,27 +366,44 @@ def generate_colors(count):
     return colors
 
 # Helper function to calculate percentage data for stacked bar charts
-def calculate_percentage_data(datasets, labels):
+def calculate_percentage_data(datasets, labels, visible_indices=None):
     # For each label/category, calculate the sum of all dataset values
     totals = [0] * len(labels)
     
-    for dataset in datasets:
-        for i, value in enumerate(dataset['data']):
-            totals[i] += abs(value)
+    # If visible_indices is not provided, use all datasets
+    if visible_indices is None:
+        visible_indices = list(range(len(datasets)))
+    
+    # Sum only the visible datasets
+    for idx in visible_indices:
+        if idx < len(datasets):
+            dataset = datasets[idx]
+            for i, value in enumerate(dataset['data']):
+                if i < len(totals):  # Ensure we don't go out of bounds
+                    totals[i] += abs(float(value)) if value is not None else 0
     
     # Convert each dataset value to a percentage of the total
     percentage_datasets = []
-    for dataset in datasets:
+    for idx, dataset in enumerate(datasets):
         percentage_data = []
-        for i, value in enumerate(dataset['data']):
-            if totals[i] > 0:
-                percentage_data.append((abs(value) / totals[i]) * 100)
-            else:
-                percentage_data.append(0)
         
-        percentage_dataset = dataset.copy()
-        percentage_dataset['data'] = percentage_data
-        percentage_datasets.append(percentage_dataset)
+        # Only process visible datasets for the result
+        if idx in visible_indices:
+            for i, value in enumerate(dataset['data']):
+                if i < len(totals) and totals[i] > 0:
+                    val = abs(float(value)) if value is not None else 0
+                    percentage_data.append((val / totals[i]) * 100)
+                else:
+                    percentage_data.append(0)
+            
+            percentage_dataset = dataset.copy()
+            percentage_dataset['data'] = percentage_data
+            percentage_datasets.append(percentage_dataset)
+        else:
+            # For hidden datasets, include them with zeros
+            percentage_dataset = dataset.copy()
+            percentage_dataset['data'] = [0] * len(dataset['data'])
+            percentage_datasets.append(percentage_dataset)
     
     return percentage_datasets
 
@@ -442,9 +459,24 @@ def apply_chart_filter():
         # Process data for chart
         chart_data = process_chart_data(df, x_axis, y_axes, chart_type)
         
+        # Add information about visible datasets
+        visible_indices = data.get('visibleDatasets')
+        
         # For percentage stacked bar, ensure we always show 100%
         if chart_type == 'percentStackedBar' and chart_data and 'datasets' in chart_data:
-            chart_data['datasets'] = calculate_percentage_data(chart_data['datasets'], chart_data['labels'])
+            # If we have information about which datasets are visible, use it
+            if visible_indices is not None:
+                chart_data['datasets'] = calculate_percentage_data(
+                    chart_data['datasets'], 
+                    chart_data['labels'],
+                    visible_indices
+                )
+            else:
+                # Otherwise recalculate with all datasets
+                chart_data['datasets'] = calculate_percentage_data(
+                    chart_data['datasets'], 
+                    chart_data['labels']
+                )
         
         return jsonify({
             'success': True,
@@ -636,6 +668,54 @@ def download_chart_code():
         return jsonify({'success': False, 'error': 'Missing chart data'})
     
     try:
+        # Add special handling for percentage stacked bar chart
+        extra_js = ""
+        if chart_type == 'percentStackedBar':
+            extra_js = """
+        // Function to recalculate percentages when toggling legend items
+        function recalculatePercentages(chart) {
+            // Get indices of visible datasets
+            const visibleDatasets = [];
+            chart.data.datasets.forEach((dataset, index) => {
+                if (!chart.getDatasetMeta(index).hidden) {
+                    visibleDatasets.push(index);
+                }
+            });
+            
+            // Calculate totals for each data point using only visible datasets
+            const totals = Array(chart.data.labels.length).fill(0);
+            visibleDatasets.forEach(datasetIndex => {
+                const dataset = chart.data.datasets[datasetIndex];
+                dataset.data.forEach((value, index) => {
+                    totals[index] += Math.abs(parseFloat(value) || 0);
+                });
+            });
+            
+            // Update percentages for visible datasets
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                if (!chart.getDatasetMeta(datasetIndex).hidden) {
+                    dataset.data = dataset.data.map((value, index) => {
+                        return totals[index] ? (Math.abs(parseFloat(value) || 0) / totals[index]) * 100 : 0;
+                    });
+                }
+            });
+            
+            chart.update();
+        }
+        
+        // Override the default legend click handler
+        const originalLegendClickHandler = Chart.defaults.plugins.legend.onClick;
+        Chart.defaults.plugins.legend.onClick = function(e, legendItem, legend) {
+            // Toggle visibility as normal
+            originalLegendClickHandler.call(this, e, legendItem, legend);
+            
+            // Recalculate percentages for stacked bar charts
+            if (chart.config.type === 'bar' && chart.options.scales.y.stacked) {
+                recalculatePercentages(chart);
+            }
+        };
+        """
+        
         # Create HTML template with chart code
         html_template = f"""<!DOCTYPE html>
 <html>
@@ -656,7 +736,7 @@ def download_chart_code():
         // Initialize chart when the page loads
         document.addEventListener('DOMContentLoaded', function() {{
             const ctx = document.getElementById('myChart').getContext('2d');
-            
+            {extra_js}
             // Chart data
             const data = {json.dumps(chart_data, indent=2)};
             
