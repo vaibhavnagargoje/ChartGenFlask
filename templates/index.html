@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Chart.js for visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js plugin for data labels -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 </head>
 <body>
@@ -134,6 +136,16 @@
                         </div>
                         <span>Bar Chart</span>
                     </div>
+                    <div class="chart-type-card" data-type="horizontalBar">
+                        <div class="chart-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="4" y="3" width="10" height="4"></rect>
+                                <rect x="4" y="10" width="16" height="4"></rect>
+                                <rect x="4" y="17" width="13" height="4"></rect>
+                            </svg>
+                        </div>
+                        <span>Horizontal Bar</span>
+                    </div>
                     <div class="chart-type-card" data-type="stackedBar">
                         <div class="chart-icon">
                             <svg viewBox="0 0 24 24">
@@ -217,7 +229,7 @@
             <h2>Your Generated Chart</h2>
             
             <!-- Add chart filter dropdown -->
-            <div class="chart-filter-controls">
+            <div class="chart-filter-controls hidden">
                 <div class="chart-filter-group">
                     <label id="chartFilterLabel">Filter Chart:</label>
                     <select id="chartFilterValue">
@@ -229,6 +241,18 @@
             
             <div class="chart-container">
                 <canvas id="chartCanvas"></canvas>
+            </div>
+
+            <!-- Chart Options -->
+            <div class="chart-options-container">
+                <div class="chart-option">
+                    <label for="showGridLines">Show Grid Lines:</label>
+                    <input type="checkbox" id="showGridLines" checked>
+                </div>
+                <div class="chart-option">
+                    <label for="showLegend">Show Legend:</label>
+                    <input type="checkbox" id="showLegend" checked>
+                </div>
             </div>
 
             <div class="chart-info-container">

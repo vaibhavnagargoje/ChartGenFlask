@@ -30,16 +30,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const downloadImageBtn = document.getElementById('downloadImageBtn');
     const downloadCodeBtn = document.getElementById('downloadCodeBtn');
     const copyDataBtn = document.getElementById('copyDataBtn');
+    const showGridLinesCheckbox = document.getElementById('showGridLines');
+    const showLegendCheckbox = document.getElementById('showLegend');
     
     // Add this after the DOM elements declarations at the top
-
     const yMinValueInput = document.getElementById('yMinValue');
     const yMaxValueInput = document.getElementById('yMaxValue');
     const applyYAxisRangeBtn = document.getElementById('applyYAxisRange');
     const resetYAxisRangeBtn = document.getElementById('resetYAxisRange');
     
     // Add these variables after the other DOM element declarations
-
     const chartDescription = document.getElementById('chartDescription');
     const chartAdditionalInfo = document.getElementById('chartAdditionalInfo');
     const shareChartBtn = document.getElementById('shareChartBtn');
@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let columns = [];
     let currentChart = null;
     let selectedChartType = '';
+    let legendItems = [];
     
     // File upload handling
     excelFileInput.addEventListener('change', function(e) {
@@ -565,8 +566,41 @@ document.addEventListener('DOMContentLoaded', function() {
                         text: ''
                     },
                     legend: {
-                        display: true,
-                        position: 'top'
+                        display: showLegendCheckbox.checked,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.datasets.length) {
+                                    return data.datasets.map(function(dataset, i) {
+                                        return {
+                                            text: dataset.label,
+                                            fillStyle: dataset.backgroundColor,
+                                            strokeStyle: dataset.borderColor,
+                                            lineWidth: dataset.borderWidth,
+                                            hidden: !chart.isDatasetVisible(i),
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        },
+                        onClick: function(e, legendItem, legend) {
+                            const index = legendItem.index;
+                            const chart = legend.chart;
+                            
+                            // Toggle visibility
+                            chart.setDatasetVisibility(index, !chart.isDatasetVisible(index));
+                            
+                            // For percentage stacked bar, recalculate percentages
+                            if (selectedChartType === 'percentStackedBar') {
+                                recalculatePercentages(chart);
+                            }
+                            
+                            chart.update();
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -602,7 +636,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 },
                 scales: {
+                    x: {
+                        grid: {
+                            display: showGridLinesCheckbox.checked
+                        }
+                    },
                     y: {
+                        grid: {
+                            display: showGridLinesCheckbox.checked
+                        },
                         ticks: {
                             callback: function(value) {
                                 if (chartType === 'percentStackedBar') {
@@ -618,14 +660,23 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // Add special configurations for certain chart types
-        if (chartType === 'stackedBar') {
+        if (chartType === 'horizontalBar') {
+            config.type = 'bar';
+            config.options.indexAxis = 'y'; // This makes the bar chart horizontal
+        } else if (chartType === 'stackedBar') {
             config.type = 'bar';
             config.options.scales = {
                 x: {
-                    stacked: true
+                    stacked: true,
+                    grid: {
+                        display: showGridLinesCheckbox.checked
+                    }
                 },
                 y: {
                     stacked: true,
+                    grid: {
+                        display: showGridLinesCheckbox.checked
+                    },
                     ticks: {
                         callback: function(value) {
                             return formatIndianNumber(value);
@@ -637,12 +688,18 @@ document.addEventListener('DOMContentLoaded', function() {
             config.type = 'bar';
             config.options.scales = {
                 x: {
-                    stacked: true
+                    stacked: true,
+                    grid: {
+                        display: showGridLinesCheckbox.checked
+                    }
                 },
                 y: {
                     stacked: true,
                     min: 0,
                     max: 100,
+                    grid: {
+                        display: showGridLinesCheckbox.checked
+                    },
                     ticks: {
                         callback: function(value) {
                             return value + '%';
@@ -657,18 +714,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 beforeInit: function(chart) {
                     // Save the original data
                     chart.originalData = JSON.parse(JSON.stringify(chartData));
-                    
-                    // Override the legend click handler
-                    const originalLegendOnClick = Chart.defaults.plugins.legend.onClick;
-                    Chart.defaults.plugins.legend.onClick = function(e, legendItem, legend) {
-                        // Call the original handler to toggle visibility
-                        originalLegendOnClick.call(this, e, legendItem, legend);
-                        
-                        // For percentage stacked bar, recalculate percentages
-                        if (selectedChartType === 'percentStackedBar') {
-                            recalculatePercentages(chart);
-                        }
-                    };
                 }
             };
             
@@ -683,6 +728,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (['scatter', 'bubble'].includes(chartType)) {
             config.options.scales = {
                 x: {
+                    grid: {
+                        display: showGridLinesCheckbox.checked
+                    },
                     ticks: {
                         callback: function(value) {
                             return formatIndianNumber(value);
@@ -690,6 +738,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 },
                 y: {
+                    grid: {
+                        display: showGridLinesCheckbox.checked
+                    },
                     ticks: {
                         callback: function(value) {
                             return formatIndianNumber(value);
@@ -704,8 +755,6 @@ document.addEventListener('DOMContentLoaded', function() {
             Chart.register(ChartDataLabels);
         }
         
-        // Add this code in the createChart function, in the plugins section, after the tooltip section
-
         // Special handling for pie/doughnut/polarArea charts
         if (['pie', 'doughnut', 'polarArea'].includes(getChartJsType(chartType))) {
             config.options.plugins.tooltip = {
@@ -727,6 +776,74 @@ document.addEventListener('DOMContentLoaded', function() {
         if (chartType === 'percentStackedBar') {
             currentChart.originalData = JSON.parse(JSON.stringify(chartData));
         }
+        
+        // Create custom legend with checkboxes if needed
+        createCustomLegend(chartData);
+    }
+    
+    // Create custom legend with checkboxes
+    function createCustomLegend(chartData) {
+        // Check if we already have a legend container
+        let legendContainer = document.querySelector('.legend-checkbox-container');
+        if (!legendContainer) {
+            // Create a container for the legend checkboxes
+            legendContainer = document.createElement('div');
+            legendContainer.className = 'legend-checkbox-container';
+            
+            // Insert after chart container
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.parentNode.insertBefore(legendContainer, chartContainer.nextSibling);
+        } else {
+            // Clear existing legend
+            legendContainer.innerHTML = '';
+        }
+        
+        // Create legend items
+        legendItems = [];
+        chartData.datasets.forEach((dataset, index) => {
+            const item = document.createElement('div');
+            item.className = 'legend-checkbox-item';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true;
+            checkbox.dataset.index = index;
+            checkbox.id = `legend-checkbox-${index}`;
+            
+            const colorBox = document.createElement('span');
+            colorBox.className = 'legend-color';
+            colorBox.style.backgroundColor = dataset.backgroundColor;
+            
+            const label = document.createElement('label');
+            label.textContent = dataset.label;
+            label.htmlFor = `legend-checkbox-${index}`;
+            
+            item.appendChild(checkbox);
+            item.appendChild(colorBox);
+            item.appendChild(label);
+            legendContainer.appendChild(item);
+            
+            // Add event listener
+            checkbox.addEventListener('change', function() {
+                const index = parseInt(this.dataset.index);
+                
+                // Toggle visibility in the chart
+                currentChart.setDatasetVisibility(index, this.checked);
+                
+                // For percentage stacked bar, recalculate percentages
+                if (selectedChartType === 'percentStackedBar') {
+                    recalculatePercentages(currentChart);
+                }
+                
+                currentChart.update();
+            });
+            
+            legendItems.push({
+                checkbox: checkbox,
+                dataset: dataset,
+                index: index
+            });
+        });
     }
     
     // Add function to recalculate percentages when toggling legend items
@@ -765,6 +882,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function getChartJsType(type) {
         const typeMap = {
             'bar': 'bar',
+            'horizontalBar': 'bar', // Will use indexAxis: 'y' for horizontal
             'stackedBar': 'bar',
             'percentStackedBar': 'bar',
             'line': 'line',
@@ -779,58 +897,56 @@ document.addEventListener('DOMContentLoaded', function() {
         return typeMap[type] || 'bar';
     }
     
-    // Add this helper function after the getChartJsType function
-
-// Format number in Indian format (e.g., 1,00,000)
-function formatIndianNumber(num) {
-    if (num === null || num === undefined || isNaN(num)) return '0';
-    
-    // Handle negative numbers
-    let isNegative = false;
-    if (num < 0) {
-        isNegative = true;
-        num = Math.abs(num);
-    }
-    
-    // Format number to handle different magnitudes properly
-    let formattedNumber;
-    
-    // For numbers less than 1,000, no special formatting needed
-    if (num < 1000) {
-        formattedNumber = num.toString();
-    } else {
-        // Convert to string and split at decimal point
-        const parts = num.toString().split('.');
-        let integerPart = parts[0];
+    // Format number in Indian format (e.g., 1,00,000)
+    function formatIndianNumber(num) {
+        if (num === null || num === undefined || isNaN(num)) return '0';
         
-        // First we get the last 3 digits
-        const lastThree = integerPart.substring(integerPart.length - 3);
-        // Then we get the remaining digits
-        const remaining = integerPart.substring(0, integerPart.length - 3);
-        
-        // Now we format the remaining digits with commas after every 2 digits
-        let formattedRemaining = '';
-        if (remaining) {
-            formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+        // Handle negative numbers
+        let isNegative = false;
+        if (num < 0) {
+            isNegative = true;
+            num = Math.abs(num);
         }
         
-        // Combine the parts
-        formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+        // Format number to handle different magnitudes properly
+        let formattedNumber;
         
-        // Add decimal part if exists
-        if (parts.length > 1) {
-            formattedNumber += '.' + parts[1];
+        // For numbers less than 1,000, no special formatting needed
+        if (num < 1000) {
+            formattedNumber = num.toString();
+        } else {
+            // Convert to string and split at decimal point
+            const parts = num.toString().split('.');
+            let integerPart = parts[0];
+            
+            // First we get the last 3 digits
+            const lastThree = integerPart.substring(integerPart.length - 3);
+            // Then we get the remaining digits
+            const remaining = integerPart.substring(0, integerPart.length - 3);
+            
+            // Now we format the remaining digits with commas after every 2 digits
+            let formattedRemaining = '';
+            if (remaining) {
+                formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+            }
+            
+            // Combine the parts
+            formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+            
+            // Add decimal part if exists
+            if (parts.length > 1) {
+                formattedNumber += '.' + parts[1];
+            }
         }
+        
+        // Add negative sign if needed
+        if (isNegative) {
+            formattedNumber = '-' + formattedNumber;
+        }
+        
+        return formattedNumber;
     }
     
-    // Add negative sign if needed
-    if (isNegative) {
-        formattedNumber = '-' + formattedNumber;
-    }
-    
-    return formattedNumber;
-}
-
     // Apply chart title
     applyChartTitleBtn.addEventListener('click', function() {
         if (currentChart) {
@@ -862,6 +978,31 @@ function formatIndianNumber(num) {
                 
                 currentChart.update();
             }
+        }
+    });
+    
+    // Toggle grid lines
+    showGridLinesCheckbox.addEventListener('change', function() {
+        if (currentChart) {
+            // Update grid display for all scales
+            if (currentChart.options.scales) {
+                Object.keys(currentChart.options.scales).forEach(scaleKey => {
+                    if (!currentChart.options.scales[scaleKey].grid) {
+                        currentChart.options.scales[scaleKey].grid = {};
+                    }
+                    currentChart.options.scales[scaleKey].grid.display = this.checked;
+                });
+            }
+            
+            currentChart.update();
+        }
+    });
+    
+    // Toggle legend
+    showLegendCheckbox.addEventListener('change', function() {
+        if (currentChart) {
+            currentChart.options.plugins.legend.display = this.checked;
+            currentChart.update();
         }
     });
     
@@ -947,7 +1088,7 @@ function formatIndianNumber(num) {
         });
     });
     
-    // Add this function to update an existing chart with new data
+    // Update an existing chart with new data
     function updateChart(chartData) {
         if (!currentChart) return;
         
@@ -970,6 +1111,19 @@ function formatIndianNumber(num) {
         
         // Update the chart
         currentChart.update();
+        
+        // Update custom legend if needed
+        updateCustomLegend();
+    }
+    
+    // Update custom legend checkboxes to match chart visibility
+    function updateCustomLegend() {
+        if (!currentChart || !legendItems.length) return;
+        
+        legendItems.forEach(item => {
+            const isVisible = currentChart.isDatasetVisible(item.index);
+            item.checkbox.checked = isVisible;
+        });
     }
     
     // Download chart as image
@@ -991,111 +1145,41 @@ function formatIndianNumber(num) {
             const description = chartDescription.value || '';
             const additionalInfo = chartAdditionalInfo.value || '';
             
-            // Create HTML template with embedded chart and info
-            const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>${chartTitle}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { 
-            font-family: Lato; 
-            margin: 20px; 
-            background-color: #f5f5f5;
+            // Send request to generate and download chart code
+            fetch('/download_chart_code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chartType: selectedChartType,
+                    chartData: chartConfig.data,
+                    chartOptions: chartConfig.options
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                // Create a link to download the blob
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${chartTitle.replace(/\s+/g, '_')}.html`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error downloading chart code:', error);
+                alert('Error downloading chart code. Please try again.');
+            });
         }
-        .chart-container { 
-            max-width: 1000px; 
-            margin: 0 auto 20px auto; 
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .chart-title {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        .chart-canvas-container {
-            height: 500px;
-            width: 100%;
-        }
-        .chart-description {
-            margin-top: 10px;
-            padding: 2px;
-            border-top: 1px solid #e9ecef;
-            font-size: 10px;
-        }
-        .chart-additional-info {
-            margin-top: 2px;
-            padding:2px;
-            font-size: 10px;
-            color: #6c757d;
-        }
-        .chart-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            padding-top: 5px;
-            border-top: 1px solid #e9ecef;
-            font-size: 12px;
-            color: #6c757d;
-        }
-        .chart-credit {
-            display: flex;
-            align-items: center;
-        }
-        .chart-credit img {
-            width: 68px;
-            height: 24px;
-            margin-right: 8px;
-        }
-    </style>
-</head>
-<body>
-    <div class="chart-container">
-        <div class="chart-title">${chartTitle}</div>
-        <div class="chart-canvas-container">
-            <canvas id="myChart"></canvas>
-        </div>
-        <div class="chart-description">${description}</div>
-        <div class="chart-additional-info">${additionalInfo}</div>
-        <div class="chart-footer">
-            <div class="chart-credit">
-                <img src="logo.png" alt="Logo">
-                <span>Center for Knowledge Alternatives</span>
-            </div>
-            <div class="chart-date">${new Date().toLocaleDateString()}</div>
-        </div>
-    </div>
-    
-    <script>
-        // Chart data and configuration
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const chartData = ${JSON.stringify(chartConfig.data, null, 2)};
-        const chartOptions = ${JSON.stringify(chartConfig.options, null, 2)};
-        
-        new Chart(ctx, {
-            type: '${chartType}',
-            data: chartData,
-            options: chartOptions
-        });
-    </script>
-</body>
-</html>`;
-        
-        // Create download link
-        const blob = new Blob([html], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.download = `${chartTitle.replace(/\s+/g, '_')}.html`;
-        link.href = URL.createObjectURL(blob);
-        link.click();
-    }
-});
+    });
     
     // Copy chart data to clipboard
     copyDataBtn.addEventListener('click', function() {
@@ -1197,59 +1281,57 @@ function formatIndianNumber(num) {
         currentChart.update();
     });
     
-    // Add these event listeners near the other event listeners
-
-// Share chart
-shareChartBtn.addEventListener('click', function() {
-    if (!currentChart) return;
+    // Share chart
+    shareChartBtn.addEventListener('click', function() {
+        if (!currentChart) return;
+        
+        // Create a temporary hidden textarea
+        const textarea = document.createElement('textarea');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-999999px';
+        
+        // Create share text with chart info
+        let shareText = `Chart: ${chartTitleInput.value || 'Untitled Chart'}\n\n`;
+        
+        if (chartDescription.value) {
+            shareText += `${chartDescription.value}\n\n`;
+        }
+        
+        if (chartAdditionalInfo.value) {
+            shareText += `${chartAdditionalInfo.value}\n\n`;
+        }
+        
+        shareText += 'Generated with ChartFlask Analytics Tool';
+        
+        // Copy to clipboard
+        textarea.value = shareText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand('copy');
+            alert('Chart information copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy chart information');
+        }
+        
+        document.body.removeChild(textarea);
+    });
     
-    // Create a temporary hidden textarea
-    const textarea = document.createElement('textarea');
-    textarea.style.position = 'fixed';
-    textarea.style.left = '-999999px';
-    
-    // Create share text with chart info
-    let shareText = `Chart: ${chartTitleInput.value || 'Untitled Chart'}\n\n`;
-    
-    if (chartDescription.value) {
-        shareText += `${chartDescription.value}\n\n`;
-    }
-    
-    if (chartAdditionalInfo.value) {
-        shareText += `${chartAdditionalInfo.value}\n\n`;
-    }
-    
-    shareText += 'Generated with ChartFlask Analytics Tool';
-    
-    // Copy to clipboard
-    textarea.value = shareText;
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        document.execCommand('copy');
-        alert('Chart information copied to clipboard!');
-    } catch (err) {
-        console.error('Failed to copy: ', err);
-        alert('Failed to copy chart information');
-    }
-    
-    document.body.removeChild(textarea);
-});
-
-// Download chart with additional info
-downloadChartWithInfoBtn.addEventListener('click', function() {
-    if (!currentChart) return;
-    
-    // First, render the current chart to an image
-    const chartImage = chartCanvas.toDataURL('image/png');
-    
-    // Create HTML content with chart info
-    const description = chartDescription.value || '';
-    const additionalInfo = chartAdditionalInfo.value || '';
-    const chartTitle = chartTitleInput.value || 'Untitled Chart';
-    
-    const html = `
+    // Download chart with additional info
+    downloadChartWithInfoBtn.addEventListener('click', function() {
+        if (!currentChart) return;
+        
+        // First, render the current chart to an image
+        const chartImage = chartCanvas.toDataURL('image/png');
+        
+        // Create HTML content with chart info
+        const description = chartDescription.value || '';
+        const additionalInfo = chartAdditionalInfo.value || '';
+        const chartTitle = chartTitleInput.value || 'Untitled Chart';
+        
+        const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -1329,12 +1411,12 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
     </div>
 </body>
 </html>`;
-    
-    // Create download link
-    const blob = new Blob([html], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.download = `${chartTitle.replace(/\s+/g, '_')}_with_info.html`;
-    link.href = URL.createObjectURL(blob);
-    link.click();
-});
+        
+        // Create download link
+        const blob = new Blob([html], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.download = `${chartTitle.replace(/\s+/g, '_')}_with_info.html`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    });
 });

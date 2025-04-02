@@ -243,8 +243,8 @@ def generate_chart():
                         dataset['data'].append(point)
                 
                 chart_data['datasets'].append(dataset)
-        elif chart_type in ['stackedBar', 'percentStackedBar']:
-            # For stacked bar charts
+        elif chart_type in ['stackedBar', 'percentStackedBar', 'horizontalBar']:
+            # For stacked bar charts and horizontal bar charts
             # Group by x-axis and calculate sum for each y-axis
             pivoted_data = pd.pivot_table(df, values=y_axes[0]['column'], index=x_axis, aggfunc='sum')
             
@@ -551,8 +551,8 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
             
         return chart_data
     
-    elif chart_type in ['stackedBar', 'percentStackedBar']:
-        # For stacked bar charts
+    elif chart_type in ['stackedBar', 'percentStackedBar', 'horizontalBar']:
+        # For stacked bar charts and horizontal bar charts
         # Group by x-axis and calculate sum for each y-axis
         if not y_axes:
             return {'labels': [], 'datasets': []}
@@ -721,9 +721,6 @@ def download_chart_code():
         }
         """
         
-        # Ensure the format function is included in the HTML
-        extra_js = format_function + "\n" + extra_js
-
         # Add special handling for percentage stacked bar chart
         extra_js = """
         // Function to recalculate percentages when toggling legend items
@@ -757,41 +754,60 @@ def download_chart_code():
             chart.update();
         }
         
-        // Override the default legend click handler
-        const originalLegendClickHandler = Chart.defaults.plugins.legend.onClick;
-        Chart.defaults.plugins.legend.onClick = function(e, legendItem, legend) {
-            // Toggle visibility as normal
-            originalLegendClickHandler.call(this, e, legendItem, legend);
+        // Custom legend with checkboxes
+        function createCustomLegend(chart, container) {
+            // Clear existing legend
+            container.innerHTML = '';
             
-            // Recalculate percentages for stacked bar charts
-            if (chart.config.type === 'bar' && chart.options.scales.y.stacked) {
-                recalculatePercentages(chart);
-            }
-        };
-        """ + extra_js
+            // Get legend items from chart
+            const items = chart.options.plugins.legend.labels.generateLabels(chart);
+            
+            // Create legend items with checkboxes
+            items.forEach(item => {
+                const li = document.createElement('div');
+                li.className = 'legend-item';
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.marginBottom = '5px';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = !item.hidden;
+                checkbox.style.marginRight = '5px';
+                
+                const colorBox = document.createElement('span');
+                colorBox.style.display = 'inline-block';
+                colorBox.style.width = '15px';
+                colorBox.style.height = '15px';
+                colorBox.style.backgroundColor = item.fillStyle;
+                colorBox.style.borderRadius = '2px';
+                colorBox.style.marginRight = '5px';
+                
+                const text = document.createElement('span');
+                text.textContent = item.text;
+                
+                li.appendChild(checkbox);
+                li.appendChild(colorBox);
+                li.appendChild(text);
+                container.appendChild(li);
+                
+                // Add event listener to checkbox
+                checkbox.addEventListener('change', function() {
+                    chart.setDatasetVisibility(item.index, checkbox.checked);
+                    
+                    // For percentage stacked bar, recalculate percentages
+                    if (chart.config.type === 'bar' && chart.options.scales.y.stacked) {
+                        recalculatePercentages(chart);
+                    }
+                    
+                    chart.update();
+                });
+            });
+        }
+        """
         
-        # Update chart options to include Indian formatting for ticks
-        if chart_type != 'percentStackedBar' and chart_type not in ['pie', 'doughnut', 'polarArea']:
-            if 'options' not in chart_options:
-                chart_options = {'scales': {'y': {'ticks': {}}}}
-            elif 'scales' not in chart_options:
-                chart_options['scales'] = {'y': {'ticks': {}}}
-            elif 'y' not in chart_options['scales']:
-                chart_options['scales']['y'] = {'ticks': {}}
-            elif 'ticks' not in chart_options['scales']['y']:
-                chart_options['scales']['y']['ticks'] = {}
-                
-            chart_options['scales']['y']['ticks']['callback'] = "function(value) { return formatIndianNumber(value); }"
-            
-            # Add tooltip callbacks
-            if 'plugins' not in chart_options:
-                chart_options['plugins'] = {'tooltip': {'callbacks': {}}}
-            elif 'tooltip' not in chart_options['plugins']:
-                chart_options['plugins']['tooltip'] = {'callbacks': {}}
-            elif 'callbacks' not in chart_options['plugins']['tooltip']:
-                chart_options['plugins']['tooltip']['callbacks'] = {}
-                
-            chart_options['plugins']['tooltip']['callbacks']['label'] = "function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += formatIndianNumber(context.parsed.y); } return label; }"
+        # Combine the JavaScript functions
+        combined_js = format_function + "\n" + extra_js
         
         # Create HTML template with chart code
         html_template = f"""<!DOCTYPE html>
@@ -800,8 +816,40 @@ def download_chart_code():
     <title>Embedded Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .chart-container {{ width: 800px; height: 500px; margin: 0 auto; }}
+        body {{ 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }}
+        .chart-container {{ 
+            width: 800px; 
+            height: 500px; 
+            margin: 0 auto; 
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }}
+        .legend-container {{
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }}
+        .chart-options {{
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }}
+        .chart-option {{
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }}
     </style>
 </head>
 <body>
@@ -809,11 +857,29 @@ def download_chart_code():
         <canvas id="myChart"></canvas>
     </div>
     
+    <div class="legend-container" id="legendContainer"></div>
+    
+    <div class="chart-options">
+        <div class="chart-option">
+            <input type="checkbox" id="showGridLines" checked>
+            <label for="showGridLines">Show Grid Lines</label>
+        </div>
+        <div class="chart-option">
+            <input type="checkbox" id="showLegend" checked>
+            <label for="showLegend">Show Legend</label>
+        </div>
+    </div>
+    
     <script>
         // Initialize chart when the page loads
         document.addEventListener('DOMContentLoaded', function() {{
             const ctx = document.getElementById('myChart').getContext('2d');
-            {extra_js}
+            const legendContainer = document.getElementById('legendContainer');
+            const showGridLinesCheckbox = document.getElementById('showGridLines');
+            const showLegendCheckbox = document.getElementById('showLegend');
+            
+            {combined_js}
+            
             // Chart data
             const data = {json.dumps(chart_data, indent=2)};
             
@@ -825,6 +891,29 @@ def download_chart_code():
                 type: '{chart_type}',
                 data: data,
                 options: options
+            }});
+            
+            // Create custom legend with checkboxes
+            createCustomLegend(chart, legendContainer);
+            
+            // Event listeners for chart options
+            showGridLinesCheckbox.addEventListener('change', function() {{
+                // Update grid display for all scales
+                if (chart.options.scales) {{
+                    Object.keys(chart.options.scales).forEach(scaleKey => {{
+                        if (!chart.options.scales[scaleKey].grid) {{
+                            chart.options.scales[scaleKey].grid = {{}};
+                        }}
+                        chart.options.scales[scaleKey].grid.display = this.checked;
+                    }});
+                }}
+                
+                chart.update();
+            }});
+            
+            showLegendCheckbox.addEventListener('change', function() {{
+                chart.options.plugins.legend.display = this.checked;
+                chart.update();
             }});
         }});
     </script>
