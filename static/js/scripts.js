@@ -31,6 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const downloadCodeBtn = document.getElementById('downloadCodeBtn');
     const copyDataBtn = document.getElementById('copyDataBtn');
     
+    // Add this after the DOM elements declarations at the top
+
+    const yMinValueInput = document.getElementById('yMinValue');
+    const yMaxValueInput = document.getElementById('yMaxValue');
+    const applyYAxisRangeBtn = document.getElementById('applyYAxisRange');
+    const resetYAxisRangeBtn = document.getElementById('resetYAxisRange');
+    
     // Define a default color palette for charts
     const colorPalette = [
         '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
@@ -553,6 +560,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     legend: {
                         display: true,
                         position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                
+                                if (context.parsed.y !== null) {
+                                    if (chartType === 'percentStackedBar') {
+                                        label += Math.round(context.parsed.y) + '%';
+                                    } else {
+                                        label += formatIndianNumber(context.parsed.y);
+                                    }
+                                }
+                                return label;
+                            }
+                        }
                     }
                 }
             }
@@ -566,7 +592,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     stacked: true
                 },
                 y: {
-                    stacked: true
+                    stacked: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatIndianNumber(value);
+                        }
+                    }
                 }
             };
         } else if (chartType === 'percentStackedBar') {
@@ -677,6 +708,54 @@ document.addEventListener('DOMContentLoaded', function() {
         return typeMap[type] || 'bar';
     }
     
+    // Add this helper function after the getChartJsType function
+
+// Format number in Indian format (e.g., 1,00,000)
+function formatIndianNumber(num) {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    
+    let isNegative = false;
+    if (num < 0) {
+        isNegative = true;
+        num = Math.abs(num);
+    }
+    
+    // Convert to string and split at decimal point
+    const parts = num.toString().split('.');
+    
+    // Format the integer part with Indian number system
+    let integerPart = parts[0];
+    let result = '';
+    
+    // Add commas for thousands place
+    let count = 0;
+    for (let i = integerPart.length - 1; i >= 0; i--) {
+        count++;
+        result = integerPart[i] + result;
+        
+        // First comma after 3 digits, then after every 2 digits
+        if (count === 3 && i !== 0) {
+            result = ',' + result;
+            count = 0;
+        } else if (count === 2 && i !== 0 && result.includes(',')) {
+            result = ',' + result;
+            count = 0;
+        }
+    }
+    
+    // Add decimal part if exists
+    if (parts.length > 1) {
+        result += '.' + parts[1];
+    }
+    
+    // Add negative sign if needed
+    if (isNegative) {
+        result = '-' + result;
+    }
+    
+    return result;
+}
+
     // Apply chart title
     applyChartTitleBtn.addEventListener('click', function() {
         if (currentChart) {
@@ -907,5 +986,70 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Chart data copied to clipboard!');
                 });
         }
+    });
+    
+    // Apply Y-axis range
+    applyYAxisRangeBtn.addEventListener('click', function() {
+        if (!currentChart) return;
+        
+        const chartType = getChartJsType(selectedChartType);
+        
+        // Skip for chart types that don't have a standard y-axis
+        if (['pie', 'doughnut', 'polarArea'].includes(chartType)) {
+            alert('Y-axis range is not applicable for this chart type');
+            return;
+        }
+        
+        // Get min and max values
+        const minValue = yMinValueInput.value.trim() === '' ? undefined : parseFloat(yMinValueInput.value);
+        const maxValue = yMaxValueInput.value.trim() === '' ? undefined : parseFloat(yMaxValueInput.value);
+        
+        // Validate values
+        if (minValue !== undefined && isNaN(minValue)) {
+            alert('Min value must be a number');
+            return;
+        }
+        
+        if (maxValue !== undefined && isNaN(maxValue)) {
+            alert('Max value must be a number');
+            return;
+        }
+        
+        if (minValue !== undefined && maxValue !== undefined && minValue >= maxValue) {
+            alert('Min value must be less than max value');
+            return;
+        }
+        
+        // Special handling for percentage stacked bar chart
+        if (selectedChartType === 'percentStackedBar') {
+            alert('Y-axis range is fixed from 0% to 100% for percentage stacked bar charts');
+            return;
+        }
+        
+        // Update chart scales
+        if (!currentChart.options.scales.y) {
+            currentChart.options.scales.y = {};
+        }
+        
+        currentChart.options.scales.y.min = minValue;
+        currentChart.options.scales.y.max = maxValue;
+        
+        // Update the chart
+        currentChart.update();
+    });
+    
+    // Reset Y-axis range to auto
+    resetYAxisRangeBtn.addEventListener('click', function() {
+        if (!currentChart) return;
+        
+        yMinValueInput.value = '';
+        yMaxValueInput.value = '';
+        
+        if (currentChart.options.scales.y) {
+            delete currentChart.options.scales.y.min;
+            delete currentChart.options.scales.y.max;
+        }
+        
+        currentChart.update();
     });
 });
