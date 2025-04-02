@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Lato';
 }
 
 body {
@@ -481,7 +481,7 @@ header h1 {
 }
 
 .credit-logo {
-    width: 24px;
+    width: 64px;
     height: 24px;
     margin-right: 8px;
 }

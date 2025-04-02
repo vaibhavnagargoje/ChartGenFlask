@@ -576,14 +576,40 @@ document.addEventListener('DOMContentLoaded', function() {
                                     label += ': ';
                                 }
                                 
-                                if (context.parsed.y !== null) {
-                                    if (chartType === 'percentStackedBar') {
-                                        label += Math.round(context.parsed.y) + '%';
-                                    } else {
-                                        label += formatIndianNumber(context.parsed.y);
-                                    }
+                                if (chartType === 'percentStackedBar') {
+                                    label += Math.round(context.parsed.y) + '%';
+                                } else if (context.parsed.y !== null) {
+                                    label += formatIndianNumber(context.parsed.y);
+                                } else if (context.parsed.x !== null && context.parsed.y !== null) {
+                                    label += `(${formatIndianNumber(context.parsed.x)}, ${formatIndianNumber(context.parsed.y)})`;
                                 }
                                 return label;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: chartType === 'percentStackedBar',
+                        color: 'white',
+                        font: {
+                            weight: 'normal' // Regular style as requested
+                        },
+                        formatter: function(value) {
+                            if (chartType === 'percentStackedBar') {
+                                return Math.round(value) + '%';
+                            }
+                            return formatIndianNumber(value);
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                if (chartType === 'percentStackedBar') {
+                                    return value + '%';
+                                } else {
+                                    return formatIndianNumber(value);
+                                }
                             }
                         }
                     }
@@ -625,15 +651,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
             
-            // Store original data for recalculation
-            const originalData = JSON.parse(JSON.stringify(chartData));
-            
-            // Add custom plugin to handle legend click for percentage stacked bar
+            // Add custom plugin for percentage calculation
             const percentageRecalculationPlugin = {
                 id: 'percentageRecalculation',
                 beforeInit: function(chart) {
                     // Save the original data
-                    chart.originalData = originalData;
+                    chart.originalData = JSON.parse(JSON.stringify(chartData));
                     
                     // Override the legend click handler
                     const originalLegendOnClick = Chart.defaults.plugins.legend.onClick;
@@ -654,6 +677,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 config.plugins = [];
             }
             config.plugins.push(percentageRecalculationPlugin);
+        }
+        
+        // For scatter and bubble charts, format axes
+        if (['scatter', 'bubble'].includes(chartType)) {
+            config.options.scales = {
+                x: {
+                    ticks: {
+                        callback: function(value) {
+                            return formatIndianNumber(value);
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return formatIndianNumber(value);
+                        }
+                    }
+                }
+            };
+        }
+        
+        // Register ChartDataLabels plugin if present and using percentage stacked bar
+        if (window.ChartDataLabels && chartType === 'percentStackedBar') {
+            Chart.register(ChartDataLabels);
+        }
+        
+        // Add this code in the createChart function, in the plugins section, after the tooltip section
+
+        // Special handling for pie/doughnut/polarArea charts
+        if (['pie', 'doughnut', 'polarArea'].includes(getChartJsType(chartType))) {
+            config.options.plugins.tooltip = {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw;
+                        const percentage = ((value / context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                        return `${label}: ${formatIndianNumber(value)} (${percentage}%)`;
+                    }
+                }
+            };
         }
         
         // Create the chart
@@ -721,46 +785,50 @@ document.addEventListener('DOMContentLoaded', function() {
 function formatIndianNumber(num) {
     if (num === null || num === undefined || isNaN(num)) return '0';
     
+    // Handle negative numbers
     let isNegative = false;
     if (num < 0) {
         isNegative = true;
         num = Math.abs(num);
     }
     
-    // Convert to string and split at decimal point
-    const parts = num.toString().split('.');
+    // Format number to handle different magnitudes properly
+    let formattedNumber;
     
-    // Format the integer part with Indian number system
-    let integerPart = parts[0];
-    let result = '';
-    
-    // Add commas for thousands place
-    let count = 0;
-    for (let i = integerPart.length - 1; i >= 0; i--) {
-        count++;
-        result = integerPart[i] + result;
+    // For numbers less than 1,000, no special formatting needed
+    if (num < 1000) {
+        formattedNumber = num.toString();
+    } else {
+        // Convert to string and split at decimal point
+        const parts = num.toString().split('.');
+        let integerPart = parts[0];
         
-        // First comma after 3 digits, then after every 2 digits
-        if (count === 3 && i !== 0) {
-            result = ',' + result;
-            count = 0;
-        } else if (count === 2 && i !== 0 && result.includes(',')) {
-            result = ',' + result;
-            count = 0;
+        // First we get the last 3 digits
+        const lastThree = integerPart.substring(integerPart.length - 3);
+        // Then we get the remaining digits
+        const remaining = integerPart.substring(0, integerPart.length - 3);
+        
+        // Now we format the remaining digits with commas after every 2 digits
+        let formattedRemaining = '';
+        if (remaining) {
+            formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
         }
-    }
-    
-    // Add decimal part if exists
-    if (parts.length > 1) {
-        result += '.' + parts[1];
+        
+        // Combine the parts
+        formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+        
+        // Add decimal part if exists
+        if (parts.length > 1) {
+            formattedNumber += '.' + parts[1];
+        }
     }
     
     // Add negative sign if needed
     if (isNegative) {
-        result = '-' + result;
+        formattedNumber = '-' + formattedNumber;
     }
     
-    return result;
+    return formattedNumber;
 }
 
     // Apply chart title
@@ -932,7 +1000,7 @@ function formatIndianNumber(num) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { 
-            font-family: Arial, sans-serif; 
+            font-family: Lato; 
             margin: 20px; 
             background-color: #f5f5f5;
         }
@@ -956,22 +1024,23 @@ function formatIndianNumber(num) {
             width: 100%;
         }
         .chart-description {
-            margin-top: 20px;
-            padding: 10px;
+            margin-top: 10px;
+            padding: 2px;
             border-top: 1px solid #e9ecef;
-            font-size: 16px;
+            font-size: 10px;
         }
         .chart-additional-info {
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 2px;
+            padding:2px;
+            font-size: 10px;
             color: #6c757d;
         }
         .chart-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 30px;
-            padding-top: 15px;
+            margin-top: 10px;
+            padding-top: 5px;
             border-top: 1px solid #e9ecef;
             font-size: 12px;
             color: #6c757d;
@@ -981,7 +1050,7 @@ function formatIndianNumber(num) {
             align-items: center;
         }
         .chart-credit img {
-            width: 24px;
+            width: 68px;
             height: 24px;
             margin-right: 8px;
         }
@@ -997,8 +1066,8 @@ function formatIndianNumber(num) {
         <div class="chart-additional-info">${additionalInfo}</div>
         <div class="chart-footer">
             <div class="chart-credit">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABIUlEQVRIie2UMUoDQRSGv9nZLGgKFSy8gYiVpZVYegMvIHgJjyD2XkFIZ2FtZ2FhYWMRsVE3M2NhAmtYdiU7RQI/DPPefP/7HzMwD/8aAdAqfFC7GG+vpnef+5u98+STVgvgcntLnU9M0y3gMUm01LYSsRxGFAMV28DU9JdWpYecn9ygLEbqWL2oPYxnqqbGJSILQFlTu5OI4uMXwRrQr4nHKKvQBlA/Hm6QDsAbmMskUQPQCrHD6CdMsgrOa34sqxAHlMXofyEuiAtaLbCKu6inNZcJ4BEw5AHGKDZWcRelp0GdT9rAZHkCuxgfiItWRVXfDmO1R16e8E2OJF2Lm5xcJDfr9/7iq/oL0Ktk9I6y6N3eVgKs9f8KlecFQOt/jxdTl5u584+QKAAAAABJRU5ErkJggg==" alt="Logo">
-                <span>Generated with ChartFlask Analytics Tool</span>
+                <img src="logo.png" alt="Logo">
+                <span>Center for Knowledge Alternatives</span>
             </div>
             <div class="chart-date">${new Date().toLocaleDateString()}</div>
         </div>

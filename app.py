@@ -668,10 +668,64 @@ def download_chart_code():
         return jsonify({'success': False, 'error': 'Missing chart data'})
     
     try:
+        # Add formatIndianNumber function to the generated code
+        format_function = """
+        // Format number in Indian format (e.g., 1,00,000)
+        function formatIndianNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0';
+            
+            // Handle negative numbers
+            let isNegative = false;
+            if (num < 0) {
+                isNegative = true;
+                num = Math.abs(num);
+            }
+            
+            // Format number to handle different magnitudes properly
+            let formattedNumber;
+            
+            // For numbers less than 1,000, no special formatting needed
+            if (num < 1000) {
+                formattedNumber = num.toString();
+            } else {
+                // Convert to string and split at decimal point
+                const parts = num.toString().split('.');
+                let integerPart = parts[0];
+                
+                // First we get the last 3 digits
+                const lastThree = integerPart.substring(integerPart.length - 3);
+                // Then we get the remaining digits
+                const remaining = integerPart.substring(0, integerPart.length - 3);
+                
+                // Now we format the remaining digits with commas after every 2 digits
+                let formattedRemaining = '';
+                if (remaining) {
+                    formattedRemaining = remaining.replace(/\\B(?=(\\d{2})+(?!\\d))/g, ',');
+                }
+                
+                // Combine the parts
+                formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+                
+                // Add decimal part if exists
+                if (parts.length > 1) {
+                    formattedNumber += '.' + parts[1];
+                }
+            }
+            
+            // Add negative sign if needed
+            if (isNegative) {
+                formattedNumber = '-' + formattedNumber;
+            }
+            
+            return formattedNumber;
+        }
+        """
+        
+        # Ensure the format function is included in the HTML
+        extra_js = format_function + "\n" + extra_js
+
         # Add special handling for percentage stacked bar chart
-        extra_js = ""
-        if chart_type == 'percentStackedBar':
-            extra_js = """
+        extra_js = """
         // Function to recalculate percentages when toggling legend items
         function recalculatePercentages(chart) {
             // Get indices of visible datasets
@@ -714,7 +768,30 @@ def download_chart_code():
                 recalculatePercentages(chart);
             }
         };
-        """
+        """ + extra_js
+        
+        # Update chart options to include Indian formatting for ticks
+        if chart_type != 'percentStackedBar' and chart_type not in ['pie', 'doughnut', 'polarArea']:
+            if 'options' not in chart_options:
+                chart_options = {'scales': {'y': {'ticks': {}}}}
+            elif 'scales' not in chart_options:
+                chart_options['scales'] = {'y': {'ticks': {}}}
+            elif 'y' not in chart_options['scales']:
+                chart_options['scales']['y'] = {'ticks': {}}
+            elif 'ticks' not in chart_options['scales']['y']:
+                chart_options['scales']['y']['ticks'] = {}
+                
+            chart_options['scales']['y']['ticks']['callback'] = "function(value) { return formatIndianNumber(value); }"
+            
+            # Add tooltip callbacks
+            if 'plugins' not in chart_options:
+                chart_options['plugins'] = {'tooltip': {'callbacks': {}}}
+            elif 'tooltip' not in chart_options['plugins']:
+                chart_options['plugins']['tooltip'] = {'callbacks': {}}
+            elif 'callbacks' not in chart_options['plugins']['tooltip']:
+                chart_options['plugins']['tooltip']['callbacks'] = {}
+                
+            chart_options['plugins']['tooltip']['callbacks']['label'] = "function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += formatIndianNumber(context.parsed.y); } return label; }"
         
         # Create HTML template with chart code
         html_template = f"""<!DOCTYPE html>
