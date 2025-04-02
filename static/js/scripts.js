@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const applyYAxisRangeBtn = document.getElementById('applyYAxisRange');
     const resetYAxisRangeBtn = document.getElementById('resetYAxisRange');
     
+    // Add these variables after the other DOM element declarations
+
+    const chartDescription = document.getElementById('chartDescription');
+    const chartAdditionalInfo = document.getElementById('chartAdditionalInfo');
+    const shareChartBtn = document.getElementById('shareChartBtn');
+    const downloadChartWithInfoBtn = document.getElementById('downloadChartWithInfoBtn');
+    
     // Define a default color palette for charts
     const colorPalette = [
         '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
@@ -912,23 +919,91 @@ function formatIndianNumber(num) {
         if (currentChart) {
             const chartConfig = currentChart.config;
             const chartType = chartConfig.type;
+            const chartTitle = chartTitleInput.value || 'Untitled Chart';
+            const description = chartDescription.value || '';
+            const additionalInfo = chartAdditionalInfo.value || '';
             
-            // Create HTML template with embedded chart
+            // Create HTML template with embedded chart and info
             const html = `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chart</title>
+    <title>${chartTitle}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .chart-container { width: 800px; height: 500px; margin: 0 auto; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .chart-container { 
+            max-width: 1000px; 
+            margin: 0 auto 20px auto; 
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .chart-canvas-container {
+            height: 500px;
+            width: 100%;
+        }
+        .chart-description {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #e9ecef;
+            font-size: 16px;
+        }
+        .chart-additional-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .chart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .chart-credit {
+            display: flex;
+            align-items: center;
+        }
+        .chart-credit img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="chart-container">
-        <canvas id="myChart"></canvas>
+        <div class="chart-title">${chartTitle}</div>
+        <div class="chart-canvas-container">
+            <canvas id="myChart"></canvas>
+        </div>
+        <div class="chart-description">${description}</div>
+        <div class="chart-additional-info">${additionalInfo}</div>
+        <div class="chart-footer">
+            <div class="chart-credit">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABIUlEQVRIie2UMUoDQRSGv9nZLGgKFSy8gYiVpZVYegMvIHgJjyD2XkFIZ2FtZ2FhYWMRsVE3M2NhAmtYdiU7RQI/DPPefP/7HzMwD/8aAdAqfFC7GG+vpnef+5u98+STVgvgcntLnU9M0y3gMUm01LYSsRxGFAMV28DU9JdWpYecn9ygLEbqWL2oPYxnqqbGJSILQFlTu5OI4uMXwRrQr4nHKKvQBlA/Hm6QDsAbmMskUQPQCrHD6CdMsgrOa34sqxAHlMXofyEuiAtaLbCKu6inNZcJ4BEw5AHGKDZWcRelp0GdT9rAZHkCuxgfiItWRVXfDmO1R16e8E2OJF2Lm5xcJDfr9/7iq/oL0Ktk9I6y6N3eVgKs9f8KlecFQOt/jxdTl5u584+QKAAAAABJRU5ErkJggg==" alt="Logo">
+                <span>Generated with ChartFlask Analytics Tool</span>
+            </div>
+            <div class="chart-date">${new Date().toLocaleDateString()}</div>
+        </div>
     </div>
+    
     <script>
         // Chart data and configuration
         const ctx = document.getElementById('myChart').getContext('2d');
@@ -943,15 +1018,15 @@ function formatIndianNumber(num) {
     </script>
 </body>
 </html>`;
-            
-            // Create download link
-            const blob = new Blob([html], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.download = 'chart.html';
-            link.href = URL.createObjectURL(blob);
-            link.click();
-        }
-    });
+        
+        // Create download link
+        const blob = new Blob([html], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.download = `${chartTitle.replace(/\s+/g, '_')}.html`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    }
+});
     
     // Copy chart data to clipboard
     copyDataBtn.addEventListener('click', function() {
@@ -1052,4 +1127,145 @@ function formatIndianNumber(num) {
         
         currentChart.update();
     });
+    
+    // Add these event listeners near the other event listeners
+
+// Share chart
+shareChartBtn.addEventListener('click', function() {
+    if (!currentChart) return;
+    
+    // Create a temporary hidden textarea
+    const textarea = document.createElement('textarea');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-999999px';
+    
+    // Create share text with chart info
+    let shareText = `Chart: ${chartTitleInput.value || 'Untitled Chart'}\n\n`;
+    
+    if (chartDescription.value) {
+        shareText += `${chartDescription.value}\n\n`;
+    }
+    
+    if (chartAdditionalInfo.value) {
+        shareText += `${chartAdditionalInfo.value}\n\n`;
+    }
+    
+    shareText += 'Generated with ChartFlask Analytics Tool';
+    
+    // Copy to clipboard
+    textarea.value = shareText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        alert('Chart information copied to clipboard!');
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy chart information');
+    }
+    
+    document.body.removeChild(textarea);
+});
+
+// Download chart with additional info
+downloadChartWithInfoBtn.addEventListener('click', function() {
+    if (!currentChart) return;
+    
+    // First, render the current chart to an image
+    const chartImage = chartCanvas.toDataURL('image/png');
+    
+    // Create HTML content with chart info
+    const description = chartDescription.value || '';
+    const additionalInfo = chartAdditionalInfo.value || '';
+    const chartTitle = chartTitleInput.value || 'Untitled Chart';
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${chartTitle}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .chart-container {
+            max-width: 1000px;
+            margin: 0 auto 20px auto;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .chart-image {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .chart-description {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #e9ecef;
+            font-size: 16px;
+        }
+        .chart-additional-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .chart-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .chart-credit {
+            display: flex;
+            align-items: center;
+        }
+        .chart-credit img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div class="chart-title">${chartTitle}</div>
+        <img class="chart-image" src="${chartImage}" alt="${chartTitle}">
+        <div class="chart-description">${description}</div>
+        <div class="chart-additional-info">${additionalInfo}</div>
+        <div class="chart-footer">
+            <div class="chart-credit">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABIUlEQVRIie2UMUoDQRSGv9nZLGgKFSy8gYiVpZVYegMvIHgJjyD2XkFIZ2FtZ2FhYWMRsVE3M2NhAmtYdiU7RQI/DPPefP/7HzMwD/8aAdAqfFC7GG+vpnef+5u98+STVgvgcntLnU9M0y3gMUm01LYSsRxGFAMV28DU9JdWpYecn9ygLEbqWL2oPYxnqqbGJSILQFlTu5OI4uMXwRrQr4nHKKvQBlA/Hm6QDsAbmMskUQPQCrHD6CdMsgrOa34sqxAHlMXofyEuiAtaLbCKu6inNZcJ4BEw5AHGKDZWcRelp0GdT9rAZHkCuxgfiItWRVXfDmO1R16e8E2OJF2Lm5xcJDfr9/7iq/oL0Ktk9I6y6N3eVgKs9f8KlecFQOt/jxdTl5u584+QKAAAAABJRU5ErkJggg==" alt="Logo">
+                <span>Generated with ChartFlask Analytics Tool</span>
+            </div>
+            <div class="chart-date">${new Date().toLocaleDateString()}</div>
+        </div>
+    </div>
+</body>
+</html>`;
+    
+    // Create download link
+    const blob = new Blob([html], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.download = `${chartTitle.replace(/\s+/g, '_')}_with_info.html`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+});
 });

@@ -230,6 +230,29 @@
                 <canvas id="chartCanvas"></canvas>
             </div>
 
+            <div class="chart-info-container">
+                <div class="chart-info-left">
+                    <div class="chart-description-area">
+                        <textarea id="chartDescription" placeholder="Enter chart description or notes here..." rows="2"></textarea>
+                        <textarea id="chartAdditionalInfo" placeholder="Additional information (smaller text)..." rows="1" class="small-text"></textarea>
+                    </div>
+                    <div class="chart-credit-area">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="credit-logo">
+                        <span class="credit-text">Generated with ChartFlask Analytics Tool</span>
+                    </div>
+                </div>
+                <div class="chart-info-right">
+                    <div class="chart-actions">
+                        <button id="shareChartBtn" class="icon-btn" title="Share Chart">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        </button>
+                        <button id="downloadChartWithInfoBtn" class="icon-btn" title="Download Chart with Info">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Chart Title and Axis Labels -->
             <div class="chart-customization">
                 <div class="chart-title-section">
