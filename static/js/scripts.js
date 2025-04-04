@@ -1249,6 +1249,7 @@ function formatIndianNumber(num) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Add Chart.js plugin for data labels if needed -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <style>
         body { 
             font-family: Lato; 
