@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Define a default color palette for charts
     const colorPalette = [
-        '#1a4570', '#ee8939', '#f5b843', '#8b3834', '#e0ba3f',
-        '#e6e770', '#4d83c5', '#d3a037', '#779c51', '#b2d571'
+        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+        '#6f42c1', '#5a5c69', '#858796', '#4287f5', '#41e169'
     ];
     
     // State variables
@@ -845,11 +845,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Replace the existing recalculatePercentages function with this one
     function recalculatePercentages(chart) {
-        if (!chart || !chart.data || !chart.data.datasets || !chart.originalData) {
+        if (!chart || !chart.data || !chart.data.datasets) {
             return;
         }
 
-        // Get indices of visible datasets
+        // Store the current dataset visibility
         const visibleDatasets = [];
         chart.data.datasets.forEach((dataset, index) => {
             const meta = chart.getDatasetMeta(index);
@@ -857,45 +857,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 visibleDatasets.push(index);
             }
         });
+
+        // We need to work with the original data (non-percentage) to recalculate
+        const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
         
+        if (!originalData || !originalData.datasets) {
+            console.error("Missing original data for percentage calculation");
+            return;
+        }
+
         // Calculate totals for each data point using only visible datasets
         const totals = Array(chart.data.labels.length).fill(0);
         visibleDatasets.forEach(datasetIndex => {
-            const originalData = chart.originalData.datasets[datasetIndex].data;
-            originalData.forEach((value, index) => {
-                totals[index] += Math.abs(parseFloat(value) || 0);
-            });
+            if (datasetIndex < originalData.datasets.length) {
+                const dataArray = originalData.datasets[datasetIndex].data;
+                dataArray.forEach((value, index) => {
+                    if (index < totals.length) {
+                        totals[index] += Math.abs(parseFloat(value) || 0);
+                    }
+                });
+            }
         });
-        
+
         // Update percentages for all datasets
         chart.data.datasets.forEach((dataset, datasetIndex) => {
             const meta = chart.getDatasetMeta(datasetIndex);
-            const originalData = chart.originalData.datasets[datasetIndex].data;
             
             if (meta) {
-            if (!meta.hidden) {
-                    // For visible datasets, calculate percentage
-                    dataset.data = originalData.map((value, index) => {
-                    return totals[index] ? (Math.abs(parseFloat(value) || 0) / totals[index]) * 100 : 0;
-                });
+                if (!meta.hidden && datasetIndex < originalData.datasets.length) {
+                    const dataArray = originalData.datasets[datasetIndex].data;
+                    dataset.data = dataArray.map((value, index) => {
+                        if (index < totals.length && totals[index] > 0) {
+                            return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
+                        }
+                        return 0;
+                    });
                 } else {
-                    // For hidden datasets, keep percentage but set to 0 for display
-                    dataset.data = originalData.map(() => 0);
+                    // Hidden datasets get zeros
+                    dataset.data = Array(chart.data.labels.length).fill(0);
                 }
             }
         });
 
-        // Update the chart with animation
-        try {
-            chart.update({
-                duration: 750, // Animation duration in milliseconds
-                easing: 'easeInOutQuart' // Smooth easing function
-            });
-        } catch (error) {
-            console.warn('Error updating chart:', error);
-            // Fallback to no animation if there's an error
-        chart.update();
-        }
+        chart.update({
+            duration: 300,
+            easing: 'easeOutQuad'
+        });
     }
     
     // Map chart types to Chart.js types
@@ -1249,7 +1256,7 @@ function formatIndianNumber(num) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Add Chart.js plugin for data labels if needed -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: Lato; 
@@ -1499,7 +1506,7 @@ function formatIndianNumber(num) {
                                 }
                                 
                                 if (${selectedChartType === 'percentStackedBar'}) {
-                                    label += Math.round(context.parsed.y) + '%';
+                                    label += parseFloat(context.parsed.y).toFixed(1) + '%';
                                 } else if (context.parsed.y !== null) {
                                     label += formatIndianNumber(context.parsed.y);
                                 }
@@ -1605,6 +1612,11 @@ function formatIndianNumber(num) {
                         dataset.data = originalChartData.datasets[i].data;
                     });
                     
+                    // Set originalData for percentage calculations
+                    if (${selectedChartType === 'percentStackedBar'}) {
+                        chart.originalData = JSON.parse(JSON.stringify(originalChartData));
+                    }
+                    
                 // Use pre-filtered data if available
                 } else if (preFilteredData && preFilteredData[filterValue]) {
                     // Use pre-filtered data from the server
@@ -1621,6 +1633,11 @@ function formatIndianNumber(num) {
                                 chart.data.datasets[i].data = dataset.data;
                             }
                         });
+                        
+                        // Store original data for percentage calculations
+                        if (${selectedChartType === 'percentStackedBar'}) {
+                            chart.originalData = JSON.parse(JSON.stringify(filteredData));
+                        }
                     }
                 } else {
                     // Fallback to client-side filtering if no pre-filtered data is available
@@ -1686,12 +1703,13 @@ function formatIndianNumber(num) {
                     }
                 });
                 
-                // Update the chart
+                // First update the chart with the new data
                 chart.update();
                 
-                // If it's a percentage stacked bar chart, recalculate percentages
+                // For percentage stacked bar charts, make sure to recalculate percentages
                 if (${selectedChartType === 'percentStackedBar'}) {
-                    recalculatePercentages(chart);
+                    // Call with a small delay to ensure chart has updated
+                    setTimeout(() => recalculatePercentages(chart), 50);
                 }
             } catch (error) {
                 console.error("Error filtering chart:", error);
@@ -1744,11 +1762,11 @@ function formatIndianNumber(num) {
         // Add the recalculatePercentages function if it's a percentage stacked bar chart
         ${selectedChartType === 'percentStackedBar' ? `
         function recalculatePercentages(chart) {
-            if (!chart || !chart.data || !chart.data.datasets || !chart.originalData) {
+            if (!chart || !chart.data || !chart.data.datasets) {
                 return;
             }
 
-            // Get indices of visible datasets
+            // Store the current dataset visibility
             const visibleDatasets = [];
             chart.data.datasets.forEach((dataset, index) => {
                 const meta = chart.getDatasetMeta(index);
@@ -1757,36 +1775,60 @@ function formatIndianNumber(num) {
                 }
             });
 
+            // We need to work with the original data (non-percentage) to recalculate
+            const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
+            
+            if (!originalData || !originalData.datasets) {
+                console.error("Missing original data for percentage calculation");
+                return;
+            }
+
             // Calculate totals for each data point using only visible datasets
             const totals = Array(chart.data.labels.length).fill(0);
             visibleDatasets.forEach(datasetIndex => {
-                const originalData = chart.originalData.datasets[datasetIndex].data;
-                originalData.forEach((value, index) => {
-                    totals[index] += Math.abs(parseFloat(value) || 0);
-                });
+                if (datasetIndex < originalData.datasets.length) {
+                    const dataArray = originalData.datasets[datasetIndex].data;
+                    dataArray.forEach((value, index) => {
+                        if (index < totals.length) {
+                            totals[index] += Math.abs(parseFloat(value) || 0);
+                        }
+                    });
+                }
             });
 
             // Update percentages for all datasets
             chart.data.datasets.forEach((dataset, datasetIndex) => {
                 const meta = chart.getDatasetMeta(datasetIndex);
-                const originalData = chart.originalData.datasets[datasetIndex].data;
                 
                 if (meta) {
-                    if (!meta.hidden) {
-                        dataset.data = originalData.map((value, index) => {
-                            return totals[index] ? (Math.abs(parseFloat(value) || 0) / totals[index]) * 100 : 0;
+                    if (!meta.hidden && datasetIndex < originalData.datasets.length) {
+                        const dataArray = originalData.datasets[datasetIndex].data;
+                        dataset.data = dataArray.map((value, index) => {
+                            if (index < totals.length && totals[index] > 0) {
+                                return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
+                            }
+                            return 0;
                         });
                     } else {
-                        dataset.data = originalData.map(() => 0);
+                        // Hidden datasets get zeros
+                        dataset.data = Array(chart.data.labels.length).fill(0);
                     }
                 }
             });
 
             chart.update({
-                duration: 750,
-                easing: 'easeInOutQuart'
+                duration: 300,
+                easing: 'easeOutQuad'
             });
-        }` : ''}
+        }
+        
+        // Make sure to call recalculatePercentages after initial chart setup
+        setTimeout(() => {
+            if ('${chartType}' === 'bar' && chart.options.scales && 
+                chart.options.scales.y && chart.options.scales.y.stacked) {
+                recalculatePercentages(chart);
+            }
+        }, 200);` : ''}
 
         // Add download functionality
         document.getElementById('downloadChartBtn').addEventListener('click', function() {
