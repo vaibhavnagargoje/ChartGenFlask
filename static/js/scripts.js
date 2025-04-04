@@ -590,6 +590,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         display: false,
                     },
                     tooltip: {
+                        backgroundColor: 'yellow', // Change tooltip background to yellow
+                        titleColor: 'black', // Change title text color (optional)
+                        bodyColor: 'black', // Change body text color (optional)
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -1125,8 +1128,120 @@ function formatIndianNumber(num) {
         const description = chartDescription.value || '';
         const additionalInfo = chartAdditionalInfo.value || '';
         
-        // Create HTML template with embedded chart and info
-        const html = `
+        // Get chart filter information
+        const chartFilterColumn = filterColumn2Select.value;
+        const chartFilterOptions = Array.from(chartFilterValue.options).map(opt => opt.value);
+        const selectedFilterValue = chartFilterValue.value;
+        
+        // Create loading indicator message for user feedback
+        const loadingDiv = document.createElement('div');
+        loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; z-index: 9999;';
+        loadingDiv.textContent = 'Preparing chart data for all districts...';
+        document.body.appendChild(loadingDiv);
+        
+        // Pre-generate filtered data for each filter option
+        const preFilteredData = {};
+        
+        // Track the number of fetch operations and completions
+        let fetchCount = 0;
+        let completedFetches = 0;
+        
+        // Only process if there are filter options
+        if (chartFilterColumn && chartFilterOptions.length > 0) {
+            // Save current chart data and state
+            const currentLabels = [...currentChart.data.labels];
+            const currentDatasets = JSON.parse(JSON.stringify(currentChart.data.datasets));
+            const currentVisibility = [];
+            currentChart.data.datasets.forEach((dataset, i) => {
+                currentVisibility.push(!currentChart.getDatasetMeta(i).hidden);
+            });
+            
+            // Process each filter option sequentially for more reliable results
+            const processFilterOptions = async () => {
+                // Create an array of promises for fetch operations
+                const fetchPromises = [];
+                
+                for (const filterOption of chartFilterOptions) {
+                    if (!filterOption) {
+                        // Skip empty option (All Values)
+                        continue;
+                    }
+                    
+                    // Create a promise for this fetch operation
+                    const fetchPromise = fetch('/apply_chart_filter', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            filename: currentFileName,
+                            sheet: currentSheetName,
+                            xAxis: xAxisSelect.value,
+                            yAxes: Array.from(document.querySelectorAll('.y-axis-item')).map(item => {
+                                return {
+                                    column: item.querySelector('.y-axis-select').value,
+                                    color: item.querySelector('.series-color').value
+                                };
+                            }),
+                            chartType: selectedChartType,
+                            startRow: parseInt(startRowInput.value),
+                            endRow: parseInt(endRowInput.value),
+                            filterColumn: filterColumnSelect.value,
+                            filterValue: filterValueSelect.value,
+                            chartFilterColumn: chartFilterColumn,
+                            chartFilterValue: filterOption
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Store the filtered data
+                            preFilteredData[filterOption] = data.chartData;
+                        }
+                        completedFetches++;
+                        
+                        // Update the loading message to show progress
+                        loadingDiv.textContent = `Preparing chart data... (${completedFetches}/${fetchCount})`;
+                    })
+                    .catch(error => {
+                        console.error('Error pre-filtering data for ' + filterOption, error);
+                        completedFetches++;
+                        loadingDiv.textContent = `Preparing chart data... (${completedFetches}/${fetchCount})`;
+                    });
+                    
+                    fetchPromises.push(fetchPromise);
+                    fetchCount++;
+                }
+                
+                // Wait for all fetch operations to complete
+                return Promise.all(fetchPromises);
+            };
+            
+            // Execute the fetch operations and then generate the HTML
+            processFilterOptions().then(() => {
+                // Remove loading message
+                document.body.removeChild(loadingDiv);
+                
+                // Restore original chart state
+                currentChart.data.labels = currentLabels;
+                currentChart.data.datasets.forEach((dataset, i) => {
+                    Object.assign(dataset, currentDatasets[i]);
+                    currentChart.getDatasetMeta(i).hidden = !currentVisibility[i];
+                });
+                currentChart.update();
+                
+                // Now continue with the HTML generation
+                generateAndDownloadHTML();
+            });
+        } else {
+            // No filter options, just generate HTML
+            document.body.removeChild(loadingDiv);
+            generateAndDownloadHTML();
+        }
+        
+        function generateAndDownloadHTML() {
+            // Create HTML template with embedded chart and info
+            const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -1166,6 +1281,30 @@ function formatIndianNumber(num) {
             width: 68px;
             height: 24px;
             margin-left: 15px;
+        }
+        .chart-filter-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .chart-filter-group {
+            display: flex;
+            align-items: center;
+        }
+        .chart-filter-group label {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+        .chart-filter-group select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
         }
         .chart-canvas-container {
             height: 500px;
@@ -1245,6 +1384,17 @@ function formatIndianNumber(num) {
             <div class="chart-title">${chartTitle}</div>
             <img class="chart-logo" src="logo.png" alt="ChartFlask Logo">
         </div>
+        ${chartFilterColumn ? `
+        <div class="chart-filter-controls">
+            <div class="chart-filter-group">
+                <label for="chartFilter">Filter by ${chartFilterColumn}:</label>
+                <select id="chartFilter" onchange="filterChartData()">
+                    <option value="">All Values</option>
+                    ${chartFilterOptions.map(value => value ? `<option value="${value}" ${value === selectedFilterValue ? 'selected' : ''}>${value}</option>` : '').join('')}
+                </select>
+            </div>
+        </div>
+        ` : ''}
         <div class="chart-canvas-container">
             <canvas id="myChart"></canvas>
         </div>
@@ -1297,6 +1447,12 @@ function formatIndianNumber(num) {
             return isNegative ? '-' + formattedNumber : formattedNumber;
         }
 
+        // Store original chart data for filtering
+        const originalChartData = ${JSON.stringify(chartConfig.data, null, 2)};
+        
+        // Pre-filtered data for each district
+        const preFilteredData = ${JSON.stringify(preFilteredData, null, 2)};
+
         // Chart configuration
         const ctx = document.getElementById('myChart').getContext('2d');
         const chartData = ${JSON.stringify(chartConfig.data, null, 2)};
@@ -1331,6 +1487,9 @@ function formatIndianNumber(num) {
                         }
                     },
                     tooltip: {
+                        backgroundColor: 'yellow', // Change tooltip background to yellow
+                        titleColor: 'black', // Change title text color (optional)
+                        bodyColor: 'black', // Change body text color (optional)
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -1423,6 +1582,164 @@ function formatIndianNumber(num) {
             legendContainer.appendChild(legendItem);
         });
 
+        ${chartFilterColumn ? `
+        // Function to filter chart data based on selected value
+        function filterChartData() {
+            const filterValue = document.getElementById('chartFilter').value;
+            
+            if (!chart || !chart.data) return;
+            
+            try {
+                // Store current dataset visibility
+                const visibility = [];
+                chart.data.datasets.forEach((dataset, index) => {
+                    visibility.push(!chart.getDatasetMeta(index).hidden);
+                });
+                
+                // Handle the "All Values" option
+                if (!filterValue) {
+                    // Reset to full data
+                    chart.data.labels = originalChartData.labels;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        dataset.data = originalChartData.datasets[i].data;
+                    });
+                    
+                // Use pre-filtered data if available
+                } else if (preFilteredData && preFilteredData[filterValue]) {
+                    // Use pre-filtered data from the server
+                    const filteredData = preFilteredData[filterValue];
+                    
+                    // Check if we have valid data
+                    if (filteredData && filteredData.labels && filteredData.datasets) {
+                        // Update labels and datasets
+                        chart.data.labels = filteredData.labels;
+                        
+                        // Update each dataset's data while preserving other properties
+                        filteredData.datasets.forEach((dataset, i) => {
+                            if (i < chart.data.datasets.length) {
+                                chart.data.datasets[i].data = dataset.data;
+                            }
+                        });
+                    }
+                } else {
+                    // Fallback to client-side filtering if no pre-filtered data is available
+                    console.log("No pre-filtered data available for " + filterValue + ", using fallback filter");
+                    
+                    if ('${chartType}' === 'pie' || '${chartType}' === 'doughnut' || '${chartType}' === 'polarArea') {
+                        // For pie/doughnut/polarArea, filter by label
+                        let matchedIndex = -1;
+                        originalChartData.labels.forEach((label, i) => {
+                            if (String(label) === String(filterValue)) {
+                                matchedIndex = i;
+                            }
+                        });
+                        
+                        if (matchedIndex >= 0) {
+                            chart.data.labels = [originalChartData.labels[matchedIndex]];
+                            chart.data.datasets.forEach((dataset, i) => {
+                                dataset.data = [originalChartData.datasets[i].data[matchedIndex]];
+                            });
+                        }
+                    } else {
+                        // For other chart types, look for the filter value in dataset labels
+                        let foundMatch = false;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            // Check if this dataset label matches the filter
+                            if (dataset.label && dataset.label.toLowerCase().includes(filterValue.toLowerCase())) {
+                                // Show this dataset
+                                chart.getDatasetMeta(i).hidden = false;
+                                foundMatch = true;
+                            } else if (foundMatch) {
+                                // Hide other datasets after we found a matching one
+                                chart.getDatasetMeta(i).hidden = true;
+                            }
+                        });
+                        
+                        if (!foundMatch) {
+                            // Try exact match in x-axis labels (categorical data)
+                            const matchingIndices = [];
+                            originalChartData.labels.forEach((label, i) => {
+                                if (String(label).toLowerCase() === String(filterValue).toLowerCase()) {
+                                    matchingIndices.push(i);
+                                }
+                            });
+                            
+                            if (matchingIndices.length > 0) {
+                                // Filter data to only show matching categories
+                                chart.data.labels = matchingIndices.map(i => originalChartData.labels[i]);
+                                chart.data.datasets.forEach((dataset, i) => {
+                                    dataset.data = matchingIndices.map(i => originalChartData.datasets[i].data[i]);
+                                });
+                            } else {
+                                // No exact matches found, show message
+                                displayFilterMessage(filterValue);
+                            }
+                        }
+                    }
+                }
+                
+                // Restore dataset visibility that wasn't specifically changed
+                chart.data.datasets.forEach((dataset, index) => {
+                    if (chart.getDatasetMeta(index).hidden === undefined) {
+                        chart.getDatasetMeta(index).hidden = !visibility[index];
+                    }
+                });
+                
+                // Update the chart
+                chart.update();
+                
+                // If it's a percentage stacked bar chart, recalculate percentages
+                if (${selectedChartType === 'percentStackedBar'}) {
+                    recalculatePercentages(chart);
+                }
+            } catch (error) {
+                console.error("Error filtering chart:", error);
+                // Show error message and reset to full data
+                displayFilterMessage(filterValue, true);
+                
+                // Reset to full data
+                chart.data.labels = originalChartData.labels;
+                chart.data.datasets.forEach((dataset, i) => {
+                    dataset.data = originalChartData.datasets[i].data;
+                });
+                chart.update();
+            }
+        }
+        
+        // Helper function to display filter messages
+        function displayFilterMessage(filterValue, isError = false) {
+            const messageDiv = document.createElement('div');
+            
+            if (isError) {
+                messageDiv.style.cssText = 'padding: 10px; margin: 10px 0; background-color: #f8d7da; color: #721c24; border-radius: 4px; border-left: 4px solid #f5c6cb;';
+                messageDiv.innerHTML = '<strong>Error:</strong> Could not filter data for "' + filterValue + 
+                    '". Showing all values.';
+            } else {
+                messageDiv.style.cssText = 'padding: 10px; margin: 10px 0; background-color: #cfe8ff; color: #084298; border-radius: 4px; border-left: 4px solid #084298;';
+                messageDiv.innerHTML = '<strong>Note:</strong> No filter data available for "' + filterValue + 
+                    '". Showing all values.';
+            }
+            
+            messageDiv.className = 'filter-message';
+            
+            const chartContainer = document.querySelector('.chart-container');
+            const existingMessage = chartContainer.querySelector('.filter-message');
+            if (existingMessage) {
+                chartContainer.removeChild(existingMessage);
+            }
+            
+            const canvasContainer = document.querySelector('.chart-canvas-container');
+            chartContainer.insertBefore(messageDiv, canvasContainer);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 4000);
+        }
+        ` : ''}
+
         // Add the recalculatePercentages function if it's a percentage stacked bar chart
         ${selectedChartType === 'percentStackedBar' ? `
         function recalculatePercentages(chart) {
@@ -1469,26 +1786,30 @@ function formatIndianNumber(num) {
                 easing: 'easeInOutQuart'
             });
         }` : ''}
-        
+
         // Add download functionality
         document.getElementById('downloadChartBtn').addEventListener('click', function() {
             const canvas = document.getElementById('myChart');
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = '${chartTitle.replace(/\s+/g, '_')}.png';
+            link.download = '${chartTitle.replace(/\\s+/g, '_')}.png';
             link.href = image;
             link.click();
         });
+        
+        // Apply the initial filter value if one is selected
+        ${selectedFilterValue ? 'setTimeout(() => filterChartData(), 100);' : ''}
     </script>
 </body>
 </html>`;
-        
-        // Create download link
-        const blob = new Blob([html], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.download = chartTitle.replace(/\s+/g, '_') + '.html';
-        link.href = URL.createObjectURL(blob);
-        link.click();
+            
+            // Create download link
+            const blob = new Blob([html], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.download = chartTitle.replace(/\s+/g, '_') + '.html';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
     }
 });
     
@@ -1642,8 +1963,7 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
     const additionalInfo = chartAdditionalInfo.value || '';
     const chartTitle = chartTitleInput.value || 'Untitled Chart';
     
-    const html = `
-<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head>
     <title>${chartTitle}</title>
@@ -1673,10 +1993,10 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
             max-width: 100%;
             height: auto;
             border-radius: 4px;
-            margin-bottom: 30px; /* Add margin to prevent overlap */
+            margin-bottom: 30px;
         }
         .chart-description {
-            margin-top: 40px; /* Increase top margin to avoid overlap with chart */
+            margin-top: 40px;
             padding: 5px;
             border-top: 1px solid #e9ecef;
             font-size: 10px;
@@ -1703,13 +2023,12 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
         }
         .chart-credit img {
             width: 70px;
-            height:auto ;
+            height: auto;
             margin-right: 8px;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-
 </head>
 <body>
     <div class="chart-container">
@@ -1726,7 +2045,6 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
                 <button id="downloadChartWithInfoBtn" class="icon-btn" title="Download Chart with Info">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 </button>
-                    
             </div>
         </div>
     </div>
@@ -1736,7 +2054,7 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
     // Create download link
     const blob = new Blob([html], { type: 'text/html' });
     const link = document.createElement('a');
-        link.download = chartTitle.replace(/\s+/g, '_') + '_with_info.html';
+    link.download = chartTitle.replace(/\s+/g, '_') + '_with_info.html';
     link.href = URL.createObjectURL(blob);
     link.click();
 });

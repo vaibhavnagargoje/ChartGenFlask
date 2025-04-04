@@ -676,9 +676,6 @@ def download_chart_code():
     original_data = data.get('originalData', chart_data)
     visible_datasets = data.get('visibleDatasets', [])
     
-    # Get dropdown options (new parameter)
-    dropdown_options = data.get('dropdownOptions', ['Option 1', 'Option 2', 'Option 3'])
-    
     if not chart_type or not chart_data:
         return jsonify({'success': False, 'error': 'Missing chart data'})
     
@@ -767,7 +764,7 @@ def download_chart_code():
                     });
                 });
                 
-                // Update percentages for all datasets
+                // Update percentages for visible datasets
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
                     if (!chart.getDatasetMeta(datasetIndex).hidden) {
                         dataset.data = originalData.datasets[datasetIndex].data.map((value, index) => {
@@ -847,22 +844,6 @@ def download_chart_code():
             """
             extra_js += "\n" + filter_js
         
-        # Add custom dropdown functionality
-        dropdown_js = """
-        // Function to handle custom dropdown selection
-        function handleDropdownChange() {
-            const selectedOption = document.getElementById('chartCustomDropdown').value;
-            alert('Selected option: ' + selectedOption);
-            
-            // You can add custom logic here based on the selected option
-            // For example, you could filter data, change chart type, etc.
-            
-            // This is just a placeholder - modify as needed
-            document.getElementById('dropdownSelectionInfo').textContent = 'Current selection: ' + selectedOption;
-        }
-        """
-        extra_js += "\n" + dropdown_js
-        
         # Prepare HTML template
         html_template = f"""<!DOCTYPE html>
 <html>
@@ -883,7 +864,6 @@ def download_chart_code():
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             padding: 20px;
-            position: relative;
         }}
         .chart-title {{
             text-align: center;
@@ -964,54 +944,11 @@ def download_chart_code():
         .hidden {{
             display: none;
         }}
-        .chart-top-controls {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }}
-        .chart-dropdown-container {{
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            background-color: #f8f9fa;
-            padding: 8px;
-            border-radius: 4px;
-            width: 300px;
-        }}
-        .chart-dropdown-container label {{
-            margin-right: 10px;
-            font-size: 14px;
-            color: #444;
-            white-space: nowrap;
-        }}
-        .chart-dropdown-container select {{
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            flex-grow: 1;
-        }}
-        #dropdownSelectionInfo {{
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-            font-style: italic;
-        }}
     </style>
 </head>
 <body>
     <div class="chart-container">
         <div class="chart-title">{chart_title}</div>
-        
-        <!-- Custom dropdown menu at the top -->
-        <div class="chart-dropdown-container">
-            <label for="chartCustomDropdown">Select Option:</label>
-            <select id="chartCustomDropdown" onchange="handleDropdownChange()">
-                {' '.join([f'<option value="{option}">{option}</option>' for option in dropdown_options])}
-            </select>
-        </div>
-        <div id="dropdownSelectionInfo"></div>
         
         {f'''
         <div class="chart-filter-controls">
@@ -1162,9 +1099,6 @@ def download_chart_code():
                 
                 legendContainer.appendChild(legendItem);
             }});
-            
-            // Initialize dropdown selection info
-            handleDropdownChange();
             
             // Initialize percentage stacked bar chart if needed
             {f"setTimeout(function() {{ recalculatePercentages(window.myChart); }}, 50);" if chart_type == 'percentStackedBar' else ""}
