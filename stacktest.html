@@ -1,0 +1,1937 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Untitled Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Chart.js plugin for data labels if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: Lato; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .chart-container { 
+            max-width: 1000px; 
+            margin: 0 auto 20px auto; 
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .chart-logo {
+            width: 68px;
+            height: 24px;
+            margin-left: 15px;
+        }
+        .chart-filter-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .chart-filter-group {
+            display: flex;
+            align-items: center;
+        }
+        .chart-filter-group label {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+        .chart-filter-group select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .chart-canvas-container {
+            height: 500px;
+            width: 100%;
+        }
+        .chart-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            padding-top: 5px;
+            border-top: 1px solid #e9ecef;
+        }
+        .chart-info {
+            flex: 1;
+        }
+        .chart-description {
+            margin-top: 0;
+            padding: 2px;
+            font-size: 10px;
+            padding-left: 70px;
+        }
+        .chart-additional-info {
+            margin-top: 2px;
+            padding: 2px;
+            font-size: 10px;
+            color:rgb(22, 22, 22);
+            padding-left: 70px;
+        }
+        .chart-actions {
+            display: flex;
+            align-items: flex-start;
+            margin-left: 15px;
+        }
+        .chart-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            margin: 0;
+        }
+        .icon-btn:hover {
+            color: #4e73df;
+        }
+        .custom-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .legend-item input {
+            cursor: pointer;
+            margin-right: 6px;
+        }
+        .legend-item span {
+            cursor: pointer;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">Untitled Chart</div>
+            <img class="chart-logo" src="logo.png" alt="ChartFlask Logo">
+        </div>
+        
+        <div class="chart-filter-controls">
+            <div class="chart-filter-group">
+                <label for="chartFilter">Filter by Taluka:</label>
+                <select id="chartFilter" onchange="filterChartData()">
+                    <option value="">All Values</option>
+                    <option value="Akole" >Akole</option><option value="Sangamner" >Sangamner</option><option value="Kopargaon" >Kopargaon</option><option value="Rahata" >Rahata</option><option value="Srirampur" >Srirampur</option><option value="Nevasa" >Nevasa</option><option value="Shevgaon" >Shevgaon</option><option value="Pathardi" >Pathardi</option><option value="Nagar" >Nagar</option><option value="Rahuri" >Rahuri</option><option value="Parner" >Parner</option><option value="Srigonda" >Srigonda</option><option value="Karjat" >Karjat</option><option value="Jamkhed" >Jamkhed</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="chart-canvas-container">
+            <canvas id="myChart"></canvas>
+        </div>
+        <div class="chart-footer">
+            <div class="chart-info">
+                
+                
+            </div>
+            <div class="chart-actions">
+                <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Indian number formatting function
+        function formatIndianNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0';
+            
+            let isNegative = false;
+            if (num < 0) {
+                isNegative = true;
+                num = Math.abs(num);
+            }
+            
+            let formattedNumber;
+            if (num < 1000) {
+                formattedNumber = num.toString();
+            } else {
+                const parts = num.toString().split('.');
+                let integerPart = parts[0];
+                
+                const lastThree = integerPart.substring(integerPart.length - 3);
+                const remaining = integerPart.substring(0, integerPart.length - 3);
+                
+                let formattedRemaining = '';
+                if (remaining) {
+                    formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+                }
+                
+                formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+                
+                if (parts.length > 1) {
+                    formattedNumber += '.' + parts[1];
+                }
+            }
+            
+            return isNegative ? '-' + formattedNumber : formattedNumber;
+        }
+
+        // Store original chart data for filtering
+        const originalChartData = {
+  "datasets": [
+    {
+      "backgroundColor": "#4e73df",
+      "borderColor": "#4e73df",
+      "borderWidth": 1,
+      "data": [
+        24.73501166047932,
+        24.73549349192815,
+        32.5,
+        24.734982115733256,
+        24.735007004051287,
+        23.45869524669598,
+        18.976249279902287,
+        18.97625386698617,
+        18.976655648043895,
+        19.288782393024416
+      ],
+      "label": "Agriculture Loans"
+    },
+    {
+      "backgroundColor": "#1cc88a",
+      "borderColor": "#1cc88a",
+      "borderWidth": 1,
+      "data": [
+        25.264988339520677,
+        25.26450650807185,
+        17.5,
+        25.265017884266744,
+        25.26499299594871,
+        26.54130475330402,
+        31.023750720097716,
+        31.02374613301383,
+        31.023344351956105,
+        30.711217606975584
+      ],
+      "label": "Non-Agriculture Loans"
+    },
+    {
+      "backgroundColor": "#36b9cc",
+      "borderColor": "#36b9cc",
+      "borderWidth": 1,
+      "data": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "label": "Total Loan"
+    }
+  ],
+  "labels": [
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ]
+};
+        
+        // Pre-filtered data for each district
+        const preFilteredData = {
+  "Akole": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          23.47247345383245,
+          23.472633987193543,
+          32.81140939597316,
+          23.47244876914712,
+          23.472218729831443,
+          26.248015873015873,
+          23.472260056297102,
+          23.472245151950013,
+          23.472162091956015,
+          23.80180391118893
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          26.527526546167547,
+          26.527366012806453,
+          17.188590604026846,
+          26.52755123085288,
+          26.527781270168553,
+          23.751984126984127,
+          26.527739943702898,
+          26.527754848049984,
+          26.52783790804399,
+          26.198196088811066
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Sangamner": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          25.224952359318014,
+          25.23142418692144,
+          32.417535280744644,
+          25.23765440035659,
+          25.232373698285837,
+          27.574440237460852,
+          25.232278210228543,
+          25.232204432782623,
+          25.232204677868786,
+          25.562312291370286
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          24.775047640681986,
+          24.76857581307856,
+          17.58246471925535,
+          24.762345599643414,
+          24.767626301714163,
+          22.425559762539148,
+          24.767721789771457,
+          24.76779556721738,
+          24.767795322131217,
+          24.437687708629717
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Kopargaon": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          24.923021191813078,
+          24.92314351353451,
+          32.41762244749277,
+          24.753453934814136,
+          24.922866547101226,
+          25.120404511115645,
+          24.922838180641687,
+          24.92282544756035,
+          24.922742739237226,
+          25.253416061011663
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          25.076978808186922,
+          25.076856486465488,
+          17.582377552507232,
+          25.246546065185864,
+          25.077133452898774,
+          24.879595488884352,
+          25.077161819358313,
+          25.07717455243965,
+          25.077257260762774,
+          24.746583938988337
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Nevasa": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          23.399558498896248,
+          23.39968298481985,
+          32.4171270718232,
+          23.45194524952929,
+          23.400209499183706,
+          28.798434894586517,
+          23.400256367911545,
+          23.400391769970973,
+          23.400383453027004,
+          23.72959063791256
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          26.600441501103756,
+          26.600317015180153,
+          17.582872928176798,
+          26.548054750470712,
+          26.59979050081629,
+          21.20156510541348,
+          26.599743632088458,
+          26.599608230029027,
+          26.599616546973,
+          26.27040936208744
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Rahata": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          23.96506440988869,
+          23.96525885558583,
+          32.41760954826331,
+          24.006747689341676,
+          23.96519582619845,
+          25.77326300709774,
+          4.214564833896017,
+          4.214588666844981,
+          4.214569955915182,
+          4.317731916539626
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          26.034935590111306,
+          26.03474114441417,
+          17.58239045173669,
+          25.993252310658328,
+          26.03480417380155,
+          24.22673699290226,
+          45.78543516610398,
+          45.78541133315502,
+          45.78543004408482,
+          45.68226808346038
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Srirampur": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          25.376158493114705,
+          25.376135764472185,
+          32.41774694631249,
+          25.616069668372376,
+          25.375995505515615,
+          17.07347795661302,
+          25.378922064777328,
+          25.37897957305852,
+          25.37624740586627,
+          25.706490456565284
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          24.623841506885295,
+          24.62386423552782,
+          17.58225305368751,
+          24.383930331627624,
+          24.624004494484385,
+          32.92652204338699,
+          24.621077935222672,
+          24.621020426941477,
+          24.62375259413373,
+          24.293509543434716
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Nagar": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          25.631884258140257,
+          25.631976709743487,
+          32.417567216551575,
+          25.541190004846914,
+          25.624685692733216,
+          12.248107258077589,
+          25.730628140266692,
+          25.730587472933884,
+          25.730624443231125,
+          26.059913884468518
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          24.368115741859743,
+          24.368023290256513,
+          17.58243278344843,
+          24.458809995153086,
+          24.375314307266784,
+          37.75189274192241,
+          24.269371859733305,
+          24.269412527066113,
+          24.269375556768875,
+          23.940086115531482
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Parner": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          24.143181974781232,
+          24.143102260291556,
+          32.417906341501755,
+          24.18262067414467,
+          24.142401860325055,
+          26.42972629633907,
+          24.142437909089008,
+          24.142454294857576,
+          24.15626711243047,
+          24.486192617432614
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          25.856818025218768,
+          25.856897739708444,
+          17.58209365849824,
+          25.817379325855335,
+          25.85759813967495,
+          23.57027370366093,
+          25.85756209091099,
+          25.85754570514242,
+          25.84373288756953,
+          25.51380738256739
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Shevgaon": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          23.848401168607676,
+          23.848417473188597,
+          32.418226702324624,
+          23.89280561831396,
+          23.848876004146152,
+          18.607216731785797,
+          23.848905084860142,
+          23.848947565382232,
+          23.84901535389815,
+          24.178885053741237
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          26.151598831392324,
+          26.151582526811406,
+          17.581773297675376,
+          26.10719438168604,
+          26.151123995853848,
+          31.392783268214203,
+          26.15109491513986,
+          26.151052434617768,
+          26.15098464610185,
+          25.821114946258767
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Pathardi": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          24.37614203507241,
+          24.37601101589551,
+          32.41770205353619,
+          24.396594057204275,
+          24.375688046816155,
+          25.481287859928635,
+          24.375758746275245,
+          24.375760312025786,
+          24.375790949823852,
+          24.707079334773653
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          25.623857964927595,
+          25.62398898410449,
+          17.582297946463807,
+          25.603405942795725,
+          25.62431195318385,
+          24.518712140071365,
+          25.624241253724755,
+          25.624239687974214,
+          25.624209050176145,
+          25.292920665226347
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Rahuri": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          25.16434312363564,
+          25.164463684229727,
+          32.41780682050235,
+          25.22622142688321,
+          25.163939980274503,
+          33.361785668558745,
+          25.163751348909578,
+          25.163836716535386,
+          25.163849424452973,
+          25.49402961893712
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          24.83565687636436,
+          24.835536315770273,
+          17.58219317949765,
+          24.773778573116793,
+          24.8360600197255,
+          16.638214331441255,
+          24.836248651090422,
+          24.836163283464614,
+          24.836150575547027,
+          24.505970381062884
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Srigonda": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          25.120540629468863,
+          25.120659065248947,
+          32.41772479917077,
+          25.120065294900982,
+          25.115975422427034,
+          26.41159074757571,
+          25.11584741423451,
+          25.115643091961715,
+          25.115576666737194,
+          25.445856459151766
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          24.879459370531137,
+          24.879340934751053,
+          17.58227520082923,
+          24.879934705099018,
+          24.884024577572962,
+          23.58840925242429,
+          24.88415258576549,
+          24.884356908038285,
+          24.884423333262806,
+          24.554143540848234
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Jamkhed": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          24.876215512620913,
+          24.87614162392093,
+          34.618927008979966,
+          24.852852073054617,
+          24.881096238458202,
+          21.557019238198254,
+          24.881063809185683,
+          24.881020145886026,
+          24.881166409705145,
+          25.211411273074262
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          25.123784487379087,
+          25.123858376079067,
+          15.381072991020032,
+          25.147147926945383,
+          25.1189037615418,
+          28.442980761801746,
+          25.118936190814317,
+          25.118979854113977,
+          25.11883359029486,
+          24.788588726925735
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Karjat": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          25.789677419354838,
+          25.789373814041745,
+          32.41749658269869,
+          25.629641237257,
+          25.793361691460444,
+          29.26707410591871,
+          25.793332158268218,
+          25.793318734013447,
+          25.79297210097817,
+          26.12268656007222
+        ],
+        "label": "Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#1cc88a",
+        "borderColor": "#1cc88a",
+        "borderWidth": 1,
+        "data": [
+          24.210322580645162,
+          24.210626185958255,
+          17.58250341730131,
+          24.370358762743,
+          24.206638308539556,
+          20.732925894081287,
+          24.206667841731786,
+          24.206681265986553,
+          24.207027899021835,
+          23.877313439927775
+        ],
+        "label": "Non-Agriculture Loans"
+      },
+      {
+        "backgroundColor": "#36b9cc",
+        "borderColor": "#36b9cc",
+        "borderWidth": 1,
+        "data": [
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50,
+          50
+        ],
+        "label": "Total Loan"
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  }
+};
+
+        // Chart configuration
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const chartData = {
+  "datasets": [
+    {
+      "backgroundColor": "#4e73df",
+      "borderColor": "#4e73df",
+      "borderWidth": 1,
+      "data": [
+        24.73501166047932,
+        24.73549349192815,
+        32.5,
+        24.734982115733256,
+        24.735007004051287,
+        23.45869524669598,
+        18.976249279902287,
+        18.97625386698617,
+        18.976655648043895,
+        19.288782393024416
+      ],
+      "label": "Agriculture Loans"
+    },
+    {
+      "backgroundColor": "#1cc88a",
+      "borderColor": "#1cc88a",
+      "borderWidth": 1,
+      "data": [
+        25.264988339520677,
+        25.26450650807185,
+        17.5,
+        25.265017884266744,
+        25.26499299594871,
+        26.54130475330402,
+        31.023750720097716,
+        31.02374613301383,
+        31.023344351956105,
+        30.711217606975584
+      ],
+      "label": "Non-Agriculture Loans"
+    },
+    {
+      "backgroundColor": "#36b9cc",
+      "borderColor": "#36b9cc",
+      "borderWidth": 1,
+      "data": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "label": "Total Loan"
+    }
+  ],
+  "labels": [
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ]
+};
+        const chartOptions = {
+  "responsive": true,
+  "maintainAspectRatio": false,
+  "animation": {
+    "duration": 750,
+    "easing": "easeInOutQuart"
+  },
+  "plugins": {
+    "title": {
+      "display": false,
+      "text": ""
+    },
+    "legend": {
+      "display": false
+    },
+    "tooltip": {
+      "backgroundColor": "yellow",
+      "titleColor": "black",
+      "bodyColor": "black",
+      "callbacks": {}
+    },
+    "datalabels": {
+      "display": true,
+      "color": "white",
+      "font": {
+        "weight": "normal"
+      }
+    }
+  },
+  "scales": {
+    "x": {
+      "axis": "x",
+      "stacked": true,
+      "type": "category",
+      "offset": true,
+      "grid": {
+        "offset": true,
+        "display": true,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "ticks": {
+        "minRotation": 0,
+        "maxRotation": 50,
+        "mirror": false,
+        "textStrokeWidth": 0,
+        "textStrokeColor": "",
+        "padding": 3,
+        "display": true,
+        "autoSkip": true,
+        "autoSkipPadding": 3,
+        "labelOffset": 0,
+        "minor": {},
+        "major": {},
+        "align": "center",
+        "crossAlign": "near",
+        "showLabelBackdrop": false,
+        "backdropColor": "rgba(255, 255, 255, 0.75)",
+        "backdropPadding": 2,
+        "color": "#666"
+      },
+      "display": true,
+      "reverse": false,
+      "beginAtZero": false,
+      "bounds": "ticks",
+      "clip": true,
+      "grace": 0,
+      "border": {
+        "display": true,
+        "dash": [],
+        "dashOffset": 0,
+        "width": 1,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "title": {
+        "display": false,
+        "text": "",
+        "padding": {
+          "top": 4,
+          "bottom": 4
+        },
+        "color": "#666"
+      },
+      "id": "x",
+      "position": "bottom"
+    },
+    "y": {
+      "axis": "y",
+      "stacked": true,
+      "min": 0,
+      "max": 100,
+      "ticks": {
+        "minRotation": 0,
+        "maxRotation": 50,
+        "mirror": false,
+        "textStrokeWidth": 0,
+        "textStrokeColor": "",
+        "padding": 3,
+        "display": true,
+        "autoSkip": true,
+        "autoSkipPadding": 3,
+        "labelOffset": 0,
+        "minor": {},
+        "major": {},
+        "align": "center",
+        "crossAlign": "near",
+        "showLabelBackdrop": false,
+        "backdropColor": "rgba(255, 255, 255, 0.75)",
+        "backdropPadding": 2,
+        "color": "#666"
+      },
+      "type": "linear",
+      "beginAtZero": true,
+      "display": true,
+      "offset": false,
+      "reverse": false,
+      "bounds": "ticks",
+      "clip": true,
+      "grace": 0,
+      "grid": {
+        "display": true,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "offset": false,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "border": {
+        "display": true,
+        "dash": [],
+        "dashOffset": 0,
+        "width": 1,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "title": {
+        "display": false,
+        "text": "",
+        "padding": {
+          "top": 4,
+          "bottom": 4
+        },
+        "color": "#666"
+      },
+      "id": "y",
+      "position": "left"
+    }
+  }
+};
+        
+        // Register plugins if needed
+        Chart.register(ChartDataLabels);
+
+        // Create chart with exact same configuration but remove redundant title
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    // Remove title from chart as it's now in the header
+                    title: {
+                        display: false
+                    },
+                    datalabels: {
+                        display: true,
+                        color: 'white',
+                        font: {
+                            weight: 'normal'
+                        },
+                        formatter: function(value) {
+                            if (true) {
+                                return Math.round(context.parsed.y);
+                            }
+                            return null;
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'yellow', // Change tooltip background to yellow
+                        titleColor: 'black', // Change title text color (optional)
+                        bodyColor: 'black', // Change body text color (optional)
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                
+                                if (true) {
+                                    label += parseFloat(context.parsed.y).toFixed(1) + '%';
+                                } else if (context.parsed.y !== null) {
+                                    label += formatIndianNumber(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    ...chartOptions.scales,
+                    y: {
+                        ...chartOptions.scales?.y,
+                        ticks: {
+                            callback: function(value) {
+                                if (true) {
+                                    return value + '%';
+                                }
+                                return formatIndianNumber(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // If it's a percentage stacked bar chart, store original data for calculations
+        chart.originalData = {
+  "datasets": [
+    {
+      "backgroundColor": "#4e73df",
+      "borderColor": "#4e73df",
+      "borderWidth": 1,
+      "data": [
+        24.73501166047932,
+        24.73549349192815,
+        32.5,
+        24.734982115733256,
+        24.735007004051287,
+        23.45869524669598,
+        18.976249279902287,
+        18.97625386698617,
+        18.976655648043895,
+        19.288782393024416
+      ],
+      "label": "Agriculture Loans"
+    },
+    {
+      "backgroundColor": "#1cc88a",
+      "borderColor": "#1cc88a",
+      "borderWidth": 1,
+      "data": [
+        25.264988339520677,
+        25.26450650807185,
+        17.5,
+        25.265017884266744,
+        25.26499299594871,
+        26.54130475330402,
+        31.023750720097716,
+        31.02374613301383,
+        31.023344351956105,
+        30.711217606975584
+      ],
+      "label": "Non-Agriculture Loans"
+    },
+    {
+      "backgroundColor": "#36b9cc",
+      "borderColor": "#36b9cc",
+      "borderWidth": 1,
+      "data": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "label": "Total Loan"
+    }
+  ],
+  "labels": [
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ]
+};
+
+        // Create custom legend container
+        const legendContainer = document.createElement('div');
+        legendContainer.className = 'custom-legend';
+        document.querySelector('.chart-canvas-container').insertBefore(legendContainer, myChart);
+
+        // Create legend items with checkboxes
+        chartData.datasets.forEach((dataset, index) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.style.backgroundColor = dataset.backgroundColor + '15';
+            legendItem.style.border = '1px solid ' + dataset.backgroundColor + '40';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true;
+
+            const label = document.createElement('span');
+            label.textContent = dataset.label;
+            label.style.color = dataset.backgroundColor;
+
+            legendItem.appendChild(checkbox);
+            legendItem.appendChild(label);
+
+            // Add click handlers
+            [checkbox, label, legendItem].forEach(element => {
+                element.addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    const meta = chart.getDatasetMeta(index);
+                    meta.hidden = !checkbox.checked;
+
+                    // Update legend item appearance
+                    legendItem.style.backgroundColor = checkbox.checked ? 
+                        dataset.backgroundColor + '15' : 
+                        '#f5f5f5';
+                    label.style.color = checkbox.checked ? 
+                        dataset.backgroundColor : 
+                        '#999';
+
+                    // If it's a percentage stacked bar chart, recalculate percentages
+                    if (true) {
+                        recalculatePercentages(chart);
+                    } else {
+                        chart.update();
+                    }
+                });
+            });
+
+            legendContainer.appendChild(legendItem);
+        });
+
+        
+        // Function to filter chart data based on selected value
+        function filterChartData() {
+            const filterValue = document.getElementById('chartFilter').value;
+            
+            if (!chart || !chart.data) return;
+            
+            try {
+                // Store current dataset visibility
+                const visibility = [];
+                chart.data.datasets.forEach((dataset, index) => {
+                    visibility.push(!chart.getDatasetMeta(index).hidden);
+                });
+                
+                // Handle the "All Values" option
+                if (!filterValue) {
+                    // Reset to full data
+                    chart.data.labels = originalChartData.labels;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        dataset.data = originalChartData.datasets[i].data;
+                    });
+                    
+                    // Set originalData for percentage calculations
+                    if (true) {
+                        chart.originalData = JSON.parse(JSON.stringify(originalChartData));
+                    }
+                    
+                // Use pre-filtered data if available
+                } else if (preFilteredData && preFilteredData[filterValue]) {
+                    // Use pre-filtered data from the server
+                    const filteredData = preFilteredData[filterValue];
+                    
+                    // Check if we have valid data
+                    if (filteredData && filteredData.labels && filteredData.datasets) {
+                        // Update labels and datasets
+                        chart.data.labels = filteredData.labels;
+                        
+                        // Update each dataset's data while preserving other properties
+                        filteredData.datasets.forEach((dataset, i) => {
+                            if (i < chart.data.datasets.length) {
+                                chart.data.datasets[i].data = dataset.data;
+                            }
+                        });
+                        
+                        // Store original data for percentage calculations
+                        if (true) {
+                            chart.originalData = JSON.parse(JSON.stringify(filteredData));
+                        }
+                    }
+                } else {
+                    // Fallback to client-side filtering if no pre-filtered data is available
+                    console.log("No pre-filtered data available for " + filterValue + ", using fallback filter");
+                    
+                    if ('bar' === 'pie' || 'bar' === 'doughnut' || 'bar' === 'polarArea') {
+                        // For pie/doughnut/polarArea, filter by label
+                        let matchedIndex = -1;
+                        originalChartData.labels.forEach((label, i) => {
+                            if (String(label) === String(filterValue)) {
+                                matchedIndex = i;
+                            }
+                        });
+                        
+                        if (matchedIndex >= 0) {
+                            chart.data.labels = [originalChartData.labels[matchedIndex]];
+                            chart.data.datasets.forEach((dataset, i) => {
+                                dataset.data = [originalChartData.datasets[i].data[matchedIndex]];
+                            });
+                        }
+                    } else {
+                        // For other chart types, look for the filter value in dataset labels
+                        let foundMatch = false;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            // Check if this dataset label matches the filter
+                            if (dataset.label && dataset.label.toLowerCase().includes(filterValue.toLowerCase())) {
+                                // Show this dataset
+                                chart.getDatasetMeta(i).hidden = false;
+                                foundMatch = true;
+                            } else if (foundMatch) {
+                                // Hide other datasets after we found a matching one
+                                chart.getDatasetMeta(i).hidden = true;
+                            }
+                        });
+                        
+                        if (!foundMatch) {
+                            // Try exact match in x-axis labels (categorical data)
+                            const matchingIndices = [];
+                            originalChartData.labels.forEach((label, i) => {
+                                if (String(label).toLowerCase() === String(filterValue).toLowerCase()) {
+                                    matchingIndices.push(i);
+                                }
+                            });
+                            
+                            if (matchingIndices.length > 0) {
+                                // Filter data to only show matching categories
+                                chart.data.labels = matchingIndices.map(i => originalChartData.labels[i]);
+                                chart.data.datasets.forEach((dataset, i) => {
+                                    dataset.data = matchingIndices.map(i => originalChartData.datasets[i].data[i]);
+                                });
+                            } else {
+                                // No exact matches found, show message
+                                displayFilterMessage(filterValue);
+                            }
+                        }
+                    }
+                }
+                
+                // Restore dataset visibility that wasn't specifically changed
+                chart.data.datasets.forEach((dataset, index) => {
+                    if (chart.getDatasetMeta(index).hidden === undefined) {
+                        chart.getDatasetMeta(index).hidden = !visibility[index];
+                    }
+                });
+                
+                // First update the chart with the new data
+                chart.update();
+                
+                // For percentage stacked bar charts, make sure to recalculate percentages
+                if (true) {
+                    // Call with a small delay to ensure chart has updated
+                    setTimeout(() => recalculatePercentages(chart), 50);
+                }
+            } catch (error) {
+                console.error("Error filtering chart:", error);
+                // Show error message and reset to full data
+                displayFilterMessage(filterValue, true);
+                
+                // Reset to full data
+                chart.data.labels = originalChartData.labels;
+                chart.data.datasets.forEach((dataset, i) => {
+                    dataset.data = originalChartData.datasets[i].data;
+                });
+                chart.update();
+            }
+        }
+        
+        // Helper function to display filter messages
+        function displayFilterMessage(filterValue, isError = false) {
+            const messageDiv = document.createElement('div');
+            
+            if (isError) {
+                messageDiv.style.cssText = 'padding: 10px; margin: 10px 0; background-color: #f8d7da; color: #721c24; border-radius: 4px; border-left: 4px solid #f5c6cb;';
+                messageDiv.innerHTML = '<strong>Error:</strong> Could not filter data for "' + filterValue + 
+                    '". Showing all values.';
+            } else {
+                messageDiv.style.cssText = 'padding: 10px; margin: 10px 0; background-color: #cfe8ff; color: #084298; border-radius: 4px; border-left: 4px solid #084298;';
+                messageDiv.innerHTML = '<strong>Note:</strong> No filter data available for "' + filterValue + 
+                    '". Showing all values.';
+            }
+            
+            messageDiv.className = 'filter-message';
+            
+            const chartContainer = document.querySelector('.chart-container');
+            const existingMessage = chartContainer.querySelector('.filter-message');
+            if (existingMessage) {
+                chartContainer.removeChild(existingMessage);
+            }
+            
+            const canvasContainer = document.querySelector('.chart-canvas-container');
+            chartContainer.insertBefore(messageDiv, canvasContainer);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 4000);
+        }
+        
+
+        // Add the recalculatePercentages function if it's a percentage stacked bar chart
+        
+        function recalculatePercentages(chart) {
+            if (!chart || !chart.data || !chart.data.datasets) {
+                return;
+            }
+
+            // Store the current dataset visibility
+            const visibleDatasets = [];
+            chart.data.datasets.forEach((dataset, index) => {
+                const meta = chart.getDatasetMeta(index);
+                if (!meta || !meta.hidden) {
+                    visibleDatasets.push(index);
+                }
+            });
+
+            // We need to work with the original data (non-percentage) to recalculate
+            const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
+            
+            if (!originalData || !originalData.datasets) {
+                console.error("Missing original data for percentage calculation");
+                return;
+            }
+
+            // Calculate totals for each data point using only visible datasets
+            const totals = Array(chart.data.labels.length).fill(0);
+            visibleDatasets.forEach(datasetIndex => {
+                if (datasetIndex < originalData.datasets.length) {
+                    const dataArray = originalData.datasets[datasetIndex].data;
+                    dataArray.forEach((value, index) => {
+                        if (index < totals.length) {
+                            totals[index] += Math.abs(parseFloat(value) || 0);
+                        }
+                    });
+                }
+            });
+
+            // Update percentages for all datasets
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                
+                if (meta) {
+                    if (!meta.hidden && datasetIndex < originalData.datasets.length) {
+                        const dataArray = originalData.datasets[datasetIndex].data;
+                        dataset.data = dataArray.map((value, index) => {
+                            if (index < totals.length && totals[index] > 0) {
+                                return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
+                            }
+                            return 0;
+                        });
+                    } else {
+                        // Hidden datasets get zeros
+                        dataset.data = Array(chart.data.labels.length).fill(0);
+                    }
+                }
+            });
+
+            chart.update({
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        // Make sure to call recalculatePercentages after initial chart setup
+        setTimeout(() => {
+            if ('bar' === 'bar' && chart.options.scales && 
+                chart.options.scales.y && chart.options.scales.y.stacked) {
+                recalculatePercentages(chart);
+            }
+        }, 200);
+
+        // Add download functionality
+        document.getElementById('downloadChartBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('myChart');
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'Untitled Chart.png';
+            link.href = image;
+            link.click();
+        });
+        
+        // Apply the initial filter value if one is selected
+        
+    </script>
+</body>
+</html>

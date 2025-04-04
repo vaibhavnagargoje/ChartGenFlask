@@ -601,7 +601,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                                 
                                 if (chartType === 'percentStackedBar') {
-                                    label += Math.round(context.parsed.y) + '%';
+                                    // Get original value from original data
+                                    const originalValue = currentChart.originalData.datasets[context.datasetIndex].data[context.dataIndex];
+                                    label += parseFloat(context.parsed.y).toFixed(1) + '% (' + formatIndianNumber(originalValue) + ')';
                                 } else if (context.parsed.y !== null) {
                                     label += formatIndianNumber(context.parsed.y);
                                 } else if (context.parsed.x !== null && context.parsed.y !== null) {
@@ -619,13 +621,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         },
                         formatter: function(value) {
                             if (chartType === 'percentStackedBar') {
-                                return Math.round(value) + '%';
+                                return parseFloat(value).toFixed(1) + '%';
                             }
                             return formatIndianNumber(value);
                         }
                     }
                 },
                 scales: {
+                    x: {
+                        grid: {
+                            display: false // Remove vertical grid lines
+                        }
+                    },
                     y: {
                         ticks: {
                             callback: function(value) {
@@ -1489,7 +1496,7 @@ function formatIndianNumber(num) {
                         },
                         formatter: function(value) {
                             if (${selectedChartType === 'percentStackedBar'}) {
-                                return Math.round(value) + '%';
+                                return parseFloat(value).toFixed(1) + '%';
                             }
                             return null;
                         }
