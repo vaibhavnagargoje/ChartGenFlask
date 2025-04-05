@@ -604,10 +604,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     // Get original value from original data
                                     const originalValue = currentChart.originalData.datasets[context.datasetIndex].data[context.dataIndex];
                                     label += parseFloat(context.parsed.y).toFixed(1) + '% (' + formatIndianNumber(originalValue) + ')';
-                                } else if (context.parsed.y !== null) {
+                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
                                     label += formatIndianNumber(context.parsed.y);
-                                } else if (context.parsed.x !== null && context.parsed.y !== null) {
-                                    label += `(${formatIndianNumber(context.parsed.x)}, ${formatIndianNumber(context.parsed.y)})`;
+                                } else {
+                                    // For null values, show 'No data' in tooltip
+                                    label += 'No data';
                                 }
                                 return label;
                             }
@@ -644,7 +645,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     }
-                }
+                },
+                spanGaps: chartType === 'line' ? false : true // Don't connect points across null values for line charts
             }
         };
         
@@ -746,8 +748,6 @@ document.addEventListener('DOMContentLoaded', function() {
             Chart.register(ChartDataLabels);
         }
         
-        // Add this code in the createChart function, in the plugins section, after the tooltip section
-
         // Special handling for pie/doughnut/polarArea charts
         if (['pie', 'doughnut', 'polarArea'].includes(getChartJsType(chartType))) {
             config.options.plugins.tooltip = {
@@ -761,85 +761,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
         }
-        
-        // Add this to the chart configuration options
-        config.options.plugins.legend.display = false; // Hide default legend
-
-        // Create custom legend container
-        const legendContainer = document.createElement('div');
-        legendContainer.className = 'custom-legend';
-        legendContainer.style.cssText = `
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-        `;
-
-        // Add the legend container before the canvas
-        chartCanvas.parentElement.insertBefore(legendContainer, chartCanvas);
-
-        // Create legend items with checkboxes
-        chartData.datasets.forEach((dataset, index) => {
-            const legendItem = document.createElement('div');
-            legendItem.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                padding: 4px 8px;
-                border-radius: 4px;
-                cursor: pointer;
-                background-color: ${dataset.backgroundColor}15;
-                border: 1px solid ${dataset.backgroundColor}40;
-            `;
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = true;
-            checkbox.style.cssText = `
-                cursor: pointer;
-                margin-right: 6px;
-            `;
-
-            const label = document.createElement('span');
-            label.textContent = dataset.label;
-            label.style.cssText = `
-                cursor: pointer;
-                color: ${dataset.backgroundColor};
-                font-weight: 500;
-            `;
-
-            legendItem.appendChild(checkbox);
-            legendItem.appendChild(label);
-
-            // Add click handlers
-            [checkbox, label, legendItem].forEach(element => {
-                element.addEventListener('click', (e) => {
-                    if (e.target !== checkbox) {
-                        checkbox.checked = !checkbox.checked;
-                    }
-                    const meta = currentChart.getDatasetMeta(index);
-                    meta.hidden = !checkbox.checked;
-
-                    // Update legend item appearance
-                    legendItem.style.backgroundColor = checkbox.checked ? 
-                        dataset.backgroundColor + '15' : 
-                        '#f5f5f5';
-                    label.style.color = checkbox.checked ? 
-                        dataset.backgroundColor : 
-                        '#999';
-
-                    // If it's a percentage stacked bar chart, recalculate percentages
-                    if (selectedChartType === 'percentStackedBar') {
-                        recalculatePercentages(currentChart);
-                    } else {
-                        currentChart.update();
-                    }
-                });
-            });
-
-            legendContainer.appendChild(legendItem);
-        });
         
         // Create the chart
         currentChart = new Chart(chartCanvas, config);
@@ -930,57 +851,55 @@ document.addEventListener('DOMContentLoaded', function() {
         return typeMap[type] || 'bar';
     }
     
-    // Add this helper function after the getChartJsType function
-
-// Format number in Indian format (e.g., 1,00,000)
-function formatIndianNumber(num) {
-    if (num === null || num === undefined || isNaN(num)) return '0';
-    
-    // Handle negative numbers
-    let isNegative = false;
-    if (num < 0) {
-        isNegative = true;
-        num = Math.abs(num);
-    }
-    
-    // Format number to handle different magnitudes properly
-    let formattedNumber;
-    
-    // For numbers less than 1,000, no special formatting needed
-    if (num < 1000) {
-        formattedNumber = num.toString();
-    } else {
-        // Convert to string and split at decimal point
-        const parts = num.toString().split('.');
-        let integerPart = parts[0];
+    // Format number in Indian format (e.g., 1,00,000)
+    function formatIndianNumber(num) {
+        if (num === null || num === undefined || isNaN(num)) return '';  // Return empty string for null values
         
-        // First we get the last 3 digits
-        const lastThree = integerPart.substring(integerPart.length - 3);
-        // Then we get the remaining digits
-        const remaining = integerPart.substring(0, integerPart.length - 3);
-        
-        // Now we format the remaining digits with commas after every 2 digits
-        let formattedRemaining = '';
-        if (remaining) {
-            formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+        // Handle negative numbers
+        let isNegative = false;
+        if (num < 0) {
+            isNegative = true;
+            num = Math.abs(num);
         }
         
-        // Combine the parts
-        formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+        // Format number to handle different magnitudes properly
+        let formattedNumber;
         
-        // Add decimal part if exists
-        if (parts.length > 1) {
-            formattedNumber += '.' + parts[1];
+        // For numbers less than 1,000, no special formatting needed
+        if (num < 1000) {
+            formattedNumber = num.toString();
+        } else {
+            // Convert to string and split at decimal point
+            const parts = num.toString().split('.');
+            let integerPart = parts[0];
+            
+            // First we get the last 3 digits
+            const lastThree = integerPart.substring(integerPart.length - 3);
+            // Then we get the remaining digits
+            const remaining = integerPart.substring(0, integerPart.length - 3);
+            
+            // Now we format the remaining digits with commas after every 2 digits
+            let formattedRemaining = '';
+            if (remaining) {
+                formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+            }
+            
+            // Combine the parts
+            formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+            
+            // Add decimal part if exists
+            if (parts.length > 1) {
+                formattedNumber += '.' + parts[1];
+            }
         }
+        
+        // Add negative sign if needed
+        if (isNegative) {
+            formattedNumber = '-' + formattedNumber;
+        }
+        
+        return formattedNumber;
     }
-    
-    // Add negative sign if needed
-    if (isNegative) {
-        formattedNumber = '-' + formattedNumber;
-    }
-    
-    return formattedNumber;
-}
 
     // Apply chart title
     applyChartTitleBtn.addEventListener('click', function() {
@@ -1429,7 +1348,7 @@ function formatIndianNumber(num) {
     <script>
         // Indian number formatting function
         function formatIndianNumber(num) {
-            if (num === null || num === undefined || isNaN(num)) return '0';
+            if (num === null || num === undefined || isNaN(num)) return '';  // Return empty string for null values
             
             let isNegative = false;
             if (num < 0) {
@@ -1514,8 +1433,10 @@ function formatIndianNumber(num) {
                                 
                                 if (${selectedChartType === 'percentStackedBar'}) {
                                     label += parseFloat(context.parsed.y).toFixed(1) + '%';
-                                } else if (context.parsed.y !== null) {
+                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
                                     label += formatIndianNumber(context.parsed.y);
+                                } else {
+                                    label += 'No data'; // For null values, show 'No data' in tooltip
                                 }
                                 return label;
                             }
@@ -1538,7 +1459,8 @@ function formatIndianNumber(num) {
                             }
                         }
                     }
-                }
+                },
+                spanGaps: ${chartType === 'line' ? 'false' : 'true'} // Don't connect points across null values for line charts
             }
         });
 

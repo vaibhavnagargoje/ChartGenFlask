@@ -187,156 +187,7 @@ def generate_chart():
             df = df[df[filter_column] == filter_value]
         
         # Process data for chart
-        if chart_type in ['pie', 'doughnut', 'polarArea']:
-            # For single-series charts, only use the first y-axis
-            if len(y_axes) > 0:
-                y_axis = y_axes[0]['column']
-                color = y_axes[0]['color']
-                
-                # Group by x-axis and sum y-values
-                pie_data = df.groupby(x_axis)[y_axis].sum().reset_index()
-                
-                chart_data = {
-                    'labels': pie_data[x_axis].tolist(),
-                    'datasets': [{
-                        'label': y_axis,
-                        'data': pie_data[y_axis].tolist(),
-                        'backgroundColor': generate_colors(len(pie_data)),
-                        'borderColor': 'white',
-                        'borderWidth': 1
-                    }]
-                }
-        elif chart_type in ['scatter', 'bubble']:
-            # For coordinate-based charts
-            chart_data = {
-                'datasets': []
-            }
-            
-            for i, y_axis_info in enumerate(y_axes):
-                y_axis = y_axis_info.get('column')
-                color = y_axis_info.get('color', f'rgba(75, 192, 192, {0.8 if i == 0 else 0.6})')
-                
-                dataset = {
-                    'label': y_axis,
-                    'backgroundColor': color,
-                    'borderColor': color,
-                    'borderWidth': 1,
-                    'data': []
-                }
-                
-                # Create data points with x,y coordinates
-                for _, row in df.iterrows():
-                    x_val = row[x_axis]
-                    y_val = row[y_axis]
-                    
-                    if pd.notna(x_val) and pd.notna(y_val):
-                        if chart_type == 'bubble':
-                            # Use a third column for bubble size if available
-                            size = 10  # Default size
-                            if i + 1 < len(y_axes):
-                                size_col = y_axes[i+1].get('column')
-                                if size_col in row and pd.notna(row[size_col]):
-                                    size = float(row[size_col])
-                            point = {'x': float(x_val), 'y': float(y_val), 'r': size}
-                        else:
-                            point = {'x': float(x_val), 'y': float(y_val)}
-                        dataset['data'].append(point)
-                
-                chart_data['datasets'].append(dataset)
-        elif chart_type in ['stackedBar', 'percentStackedBar']:
-            # For stacked bar charts
-            # Group by x-axis and calculate sum for each y-axis
-            pivoted_data = pd.pivot_table(df, values=y_axes[0]['column'], index=x_axis, aggfunc='sum')
-            
-            for i in range(1, len(y_axes)):
-                y_axis = y_axes[i]['column']
-                temp_pivot = pd.pivot_table(df, values=y_axis, index=x_axis, aggfunc='sum')
-                pivoted_data = pd.merge(pivoted_data, temp_pivot, left_index=True, right_index=True)
-            
-            pivoted_data = pivoted_data.reset_index()
-            
-            # Create chart data structure
-            chart_data = {
-                'labels': pivoted_data[x_axis].tolist(),
-                'datasets': []
-            }
-            
-            # For each y-axis, create a dataset
-            for i, y_axis_info in enumerate(y_axes):
-                y_axis = y_axis_info.get('column')
-                color = y_axis_info.get('color', f'rgba(75, 192, 192, {0.8 if i == 0 else 0.6})')
-                
-                values = pivoted_data[y_axis].tolist()
-                
-                # For percentage stacked bars, convert to percentages
-                if chart_type == 'percentStackedBar':
-                    # Calculate totals for each x-axis label
-                    totals = [0] * len(pivoted_data)
-                    for j, y_info in enumerate(y_axes):
-                        y_col = y_info.get('column')
-                        for k, val in enumerate(pivoted_data[y_col].tolist()):
-                            if not pd.isna(val):
-                                totals[k] += abs(val)
-                    
-                    # Convert to percentages
-                    percent_values = []
-                    for j, val in enumerate(values):
-                        if totals[j] > 0:
-                            percent_values.append((abs(val) / totals[j]) * 100)
-                        else:
-                            percent_values.append(0)
-                    
-                    values = percent_values
-                
-                dataset = {
-                    'label': y_axis,
-                    'data': values,
-                    'backgroundColor': color,
-                    'borderColor': color,
-                    'borderWidth': 1
-                }
-                
-                chart_data['datasets'].append(dataset)
-        else:
-            # For standard charts (bar, line, radar)
-            # Group by x-axis and calculate sum for each y-axis
-            chart_data = {
-                'labels': df[x_axis].unique().tolist(),
-                'datasets': []
-            }
-            
-            # Add datasets based on y-axes
-            for i, y_axis_info in enumerate(y_axes):
-                y_axis = y_axis_info.get('column')
-                color = y_axis_info.get('color', f'rgba(75, 192, 192, {0.8 if i == 0 else 0.6})')
-                
-                # Group by x-axis and sum y-values
-                grouped_data = df.groupby(x_axis)[y_axis].sum().reset_index()
-                
-                # Create a dataframe with all possible x-axis values to handle missing values
-                all_x = pd.DataFrame({x_axis: chart_data['labels']})
-                merged_data = pd.merge(all_x, grouped_data, on=x_axis, how='left').fillna(0)
-                
-                dataset = {
-                    'label': y_axis,
-                    'data': merged_data[y_axis].tolist(),
-                    'backgroundColor': color,
-                    'borderColor': color,
-                    'borderWidth': 1
-                }
-                
-                # Additional properties for line charts
-                if chart_type == 'line':
-                    dataset['fill'] = False
-                    dataset['tension'] = 0
-                
-                # Additional properties for radar charts
-                if chart_type == 'radar':
-                    dataset['fill'] = True
-                    color_with_opacity = color.replace(')', ', 0.2)').replace('rgb', 'rgba')
-                    dataset['backgroundColor'] = color_with_opacity
-                
-                chart_data['datasets'].append(dataset)
+        chart_data = process_chart_data(df, x_axis, y_axes, chart_type)
         
         # Prepare chart filter values if specified
         chart_filter_values = []
@@ -632,11 +483,14 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
             
             # Create a dataframe with all possible x-axis values to handle missing values
             all_x = pd.DataFrame({x_axis: chart_data['labels']})
-            merged_data = pd.merge(all_x, grouped_data, on=x_axis, how='left').fillna(0)
             
+            # Don't fill NaN with 0, instead keep them as None for JSON
+            merged_data = pd.merge(all_x, grouped_data, on=x_axis, how='left')
+            
+            # Convert NaN to None for proper JSON serialization
             dataset = {
                 'label': y_axis,
-                'data': merged_data[y_axis].tolist(),
+                'data': [None if pd.isna(val) else val for val in merged_data[y_axis].tolist()],
                 'backgroundColor': color,
                 'borderColor': color,
                 'borderWidth': 1
@@ -646,6 +500,7 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
             if chart_type == 'line':
                 dataset['fill'] = False
                 dataset['tension'] = 0
+                dataset['spanGaps'] = False  # Don't connect points across gaps (nulls)
             
             # Additional properties for radar charts
             if chart_type == 'radar':
