@@ -328,7 +328,7 @@ def generate_chart():
                 # Additional properties for line charts
                 if chart_type == 'line':
                     dataset['fill'] = False
-                    dataset['tension'] = 0.1
+                    dataset['tension'] = 0
                 
                 # Additional properties for radar charts
                 if chart_type == 'radar':
@@ -645,7 +645,7 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
             # Additional properties for line charts
             if chart_type == 'line':
                 dataset['fill'] = False
-                dataset['tension'] = 0.1
+                dataset['tension'] = 0
             
             # Additional properties for radar charts
             if chart_type == 'radar':
