@@ -207,8 +207,8 @@ def generate_chart():
 def generate_colors(count):
     # Use a predefined color palette for better visual appeal
     color_palette = [
-        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-        '#6f42c1', '#5a5c69', '#858796', '#4287f5', '#41e169'
+        '#1a4570', '#ee8939', '#f5b843', '#8b3834', '#e0ba3f',
+        '#e6e770', '#4d83c5', '#d3a037', '#779c51', '#b2d571'
     ]
     
     colors = []
@@ -370,7 +370,7 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
         
         for i, y_axis_info in enumerate(y_axes):
             y_axis = y_axis_info.get('column')
-            color = y_axis_info.get('color', f'rgba(75, 192, 192, {0.8 if i == 0 else 0.6})')
+            color = y_axis_info.get('color', f'rgba(26,69,112 , {0.8 if i == 0 else 0.6})')
             
             dataset = {
                 'label': y_axis,
@@ -426,7 +426,7 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
         # For each y-axis, create a dataset
         for i, y_axis_info in enumerate(y_axes):
             y_axis = y_axis_info.get('column')
-            color = y_axis_info.get('color', f'rgba(75, 192, 192, {0.8 if i == 0 else 0.6})')
+            color = y_axis_info.get('color', f'rgba(26, 69, 112, {0.8 if i == 0 else 0.6})')
             
             values = pivoted_data[y_axis].tolist()
             
@@ -476,7 +476,7 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
         # Add datasets based on y-axes
         for i, y_axis_info in enumerate(y_axes):
             y_axis = y_axis_info.get('column')
-            color = y_axis_info.get('color', f'rgba(75, 192, 192, {0.8 if i == 0 else 0.6})')
+            color = y_axis_info.get('color', f'rgba(26, 69, 112, {0.8 if i == 0 else 0.6})')
             
             # Group by x-axis and sum y-values
             grouped_data = df.groupby(x_axis)[y_axis].sum().reset_index()

@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Define a default color palette for charts
     const colorPalette = [
-        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
-        '#6f42c1', '#5a5c69', '#858796', '#4287f5', '#41e169'
+        '#1a4570', '#ee8939', '#f5b843', '#8b3834', '#e0ba3f',
+        '#e6e770', '#4d83c5', '#d3a037', '#779c51', '#b2d571'
     ];
     
     // State variables
@@ -551,8 +551,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Apply color palette to datasets if not already set
         for (let i = 0; i < chartData.datasets.length; i++) {
             const dataset = chartData.datasets[i];
-            if (!dataset.backgroundColor || dataset.backgroundColor === 'rgba(75, 192, 192, 0.8)' ||
-                dataset.backgroundColor.startsWith('rgba(75, 192, 192,')) {
+            if (!dataset.backgroundColor || dataset.backgroundColor === 'rgba(243, 124, 5, 0.88)' ||
+                dataset.backgroundColor.startsWith('rgba(26, 69, 112,')) {
                 const colorIndex = i % colorPalette.length;
                 dataset.backgroundColor = colorPalette[colorIndex];
                 dataset.borderColor = colorPalette[colorIndex];
@@ -655,7 +655,10 @@ document.addEventListener('DOMContentLoaded', function() {
             config.type = 'bar';
             config.options.scales = {
                 x: {
-                    stacked: true
+                    stacked: true,
+                    grid: {
+                        display: false // Remove vertical grid lines
+                    }
                 },
                 y: {
                     stacked: true,
@@ -670,7 +673,10 @@ document.addEventListener('DOMContentLoaded', function() {
             config.type = 'bar';
             config.options.scales = {
                 x: {
-                    stacked: true
+                    stacked: true,
+                    grid: {
+                        display: false // Remove vertical grid lines
+                    }
                 },
                 y: {
                     stacked: true,
@@ -731,7 +737,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         callback: function(value) {
                             return formatIndianNumber(value);
                         }
+                    },
+                    grid: {
+                        display: false // Remove vertical grid lines
                     }
+                    
                 },
                 y: {
                     ticks: {

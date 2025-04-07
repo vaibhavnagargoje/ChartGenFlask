@@ -149,7 +149,7 @@
                 <label for="chartFilter">Filter by Taluka:</label>
                 <select id="chartFilter" onchange="filterChartData()">
                     <option value="">All Values</option>
-                    <option value="Akole" >Akole</option><option value="Sangamner" >Sangamner</option><option value="Kopargaon" >Kopargaon</option><option value="Rahata" >Rahata</option><option value="Srirampur" >Srirampur</option><option value="Nevasa" >Nevasa</option><option value="Shevgaon" >Shevgaon</option><option value="Pathardi" >Pathardi</option><option value="Nagar" >Nagar</option><option value="Rahuri" >Rahuri</option><option value="Parner" >Parner</option><option value="Srigonda" >Srigonda</option><option value="Karjat" >Karjat</option><option value="Jamkhed" >Jamkhed</option>
+                    <option value="Devgad" >Devgad</option><option value="Vaibhavwadi" >Vaibhavwadi</option><option value="Kankavali" >Kankavali</option><option value="Malvan" >Malvan</option><option value="Vengurla" >Vengurla</option><option value="Kudal" >Kudal</option><option value="Sawantwadi" >Sawantwadi</option><option value="Dodamarg" >Dodamarg</option><option value="Kankawali" >Kankawali</option><option value="Malwan" >Malwan</option><option value="Savantwadi" >Savantwadi</option>
                 </select>
             </div>
         </div>
@@ -173,7 +173,7 @@
     <script>
         // Indian number formatting function
         function formatIndianNumber(num) {
-            if (num === null || num === undefined || isNaN(num)) return '0';
+            if (num === null || num === undefined || isNaN(num)) return '';  // Return empty string for null values
             
             let isNegative = false;
             if (num < 0) {
@@ -214,54 +214,21 @@
       "borderColor": "#4e73df",
       "borderWidth": 1,
       "data": [
-        24.73501166047932,
-        24.73549349192815,
-        32.5,
-        24.734982115733256,
-        24.735007004051287,
-        23.45869524669598,
-        18.976249279902287,
-        18.97625386698617,
-        18.976655648043895,
-        19.288782393024416
+        0,
+        366596,
+        366596,
+        403048,
+        624587,
+        708101,
+        0,
+        870585,
+        882431,
+        985227
       ],
-      "label": "Agriculture Loans"
-    },
-    {
-      "backgroundColor": "#1cc88a",
-      "borderColor": "#1cc88a",
-      "borderWidth": 1,
-      "data": [
-        25.264988339520677,
-        25.26450650807185,
-        17.5,
-        25.265017884266744,
-        25.26499299594871,
-        26.54130475330402,
-        31.023750720097716,
-        31.02374613301383,
-        31.023344351956105,
-        30.711217606975584
-      ],
-      "label": "Non-Agriculture Loans"
-    },
-    {
-      "backgroundColor": "#36b9cc",
-      "borderColor": "#36b9cc",
-      "borderWidth": 1,
-      "data": [
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50
-      ],
-      "label": "Total Loan"
+      "fill": false,
+      "label": "Deposits",
+      "spanGaps": false,
+      "tension": 0
     }
   ],
   "labels": [
@@ -280,61 +247,28 @@
         
         // Pre-filtered data for each district
         const preFilteredData = {
-  "Akole": {
+  "Devgad": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          23.47247345383245,
-          23.472633987193543,
-          32.81140939597316,
-          23.47244876914712,
-          23.472218729831443,
-          26.248015873015873,
-          23.472260056297102,
-          23.472245151950013,
-          23.472162091956015,
-          23.80180391118893
+          0,
+          45152,
+          45152,
+          49852,
+          83250,
+          92053,
+          'null',
+          132546,
+          129136,
+          84666
         ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          26.527526546167547,
-          26.527366012806453,
-          17.188590604026846,
-          26.52755123085288,
-          26.527781270168553,
-          23.751984126984127,
-          26.527739943702898,
-          26.527754848049984,
-          26.52783790804399,
-          26.198196088811066
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
@@ -350,61 +284,28 @@
       2021
     ]
   },
-  "Sangamner": {
+  "Kudal": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          25.224952359318014,
-          25.23142418692144,
-          32.417535280744644,
-          25.23765440035659,
-          25.232373698285837,
-          27.574440237460852,
-          25.232278210228543,
-          25.232204432782623,
-          25.232204677868786,
-          25.562312291370286
+          0,
+          82216,
+          82216,
+          87206,
+          142098,
+          162863,
+          0,
+          81312,
+          178332,
+          275774
         ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          24.775047640681986,
-          24.76857581307856,
-          17.58246471925535,
-          24.762345599643414,
-          24.767626301714163,
-          22.425559762539148,
-          24.767721789771457,
-          24.76779556721738,
-          24.767795322131217,
-          24.437687708629717
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
@@ -420,61 +321,28 @@
       2021
     ]
   },
-  "Kopargaon": {
+  "Vaibhavwadi": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          24.923021191813078,
-          24.92314351353451,
-          32.41762244749277,
-          24.753453934814136,
-          24.922866547101226,
-          25.120404511115645,
-          24.922838180641687,
-          24.92282544756035,
-          24.922742739237226,
-          25.253416061011663
+          0,
+          13275,
+          13275,
+          16875,
+          22889,
+          28324,
+          null,
+          45183,
+          46120,
+          25790
         ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          25.076978808186922,
-          25.076856486465488,
-          17.582377552507232,
-          25.246546065185864,
-          25.077133452898774,
-          24.879595488884352,
-          25.077161819358313,
-          25.07717455243965,
-          25.077257260762774,
-          24.746583938988337
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
@@ -490,61 +358,90 @@
       2021
     ]
   },
-  "Nevasa": {
+  "Malvan": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          23.399558498896248,
-          23.39968298481985,
-          32.4171270718232,
-          23.45194524952929,
-          23.400209499183706,
-          28.798434894586517,
-          23.400256367911545,
-          23.400391769970973,
-          23.400383453027004,
-          23.72959063791256
+          0,
+          45243,
+          45243,
+          50913,
+          58916,
+          63729,
+          0
         ],
-        "label": "Agriculture Loans"
-      },
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
+    ]
+  },
+  "Kankavali": {
+    "datasets": [
       {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          26.600441501103756,
-          26.600317015180153,
-          17.582872928176798,
-          26.548054750470712,
-          26.59979050081629,
-          21.20156510541348,
-          26.599743632088458,
-          26.599608230029027,
-          26.599616546973,
-          26.27040936208744
+          0,
+          61123,
+          61123,
+          68123,
+          91243,
+          106215,
+          0
         ],
-        "label": "Non-Agriculture Loans"
-      },
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
+    ]
+  },
+  "Vengurla": {
+    "datasets": [
       {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
+          0,
+          40263,
+          40263,
+          43633,
+          69743,
+          70810,
+          0,
+          174117,
+          83016,
+          86637
         ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
@@ -560,61 +457,59 @@
       2021
     ]
   },
-  "Rahata": {
+  "Sawantwadi": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          23.96506440988869,
-          23.96525885558583,
-          32.41760954826331,
-          24.006747689341676,
-          23.96519582619845,
-          25.77326300709774,
-          4.214564833896017,
-          4.214588666844981,
-          4.214569955915182,
-          4.317731916539626
+          0,
+          61078,
+          61078,
+          65218,
+          114219,
+          134540,
+          0
         ],
-        "label": "Agriculture Loans"
-      },
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
+    ]
+  },
+  "Dodamarg": {
+    "datasets": [
       {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          26.034935590111306,
-          26.03474114441417,
-          17.58239045173669,
-          25.993252310658328,
-          26.03480417380155,
-          24.22673699290226,
-          45.78543516610398,
-          45.78541133315502,
-          45.78543004408482,
-          45.68226808346038
+          0,
+          18246,
+          18246,
+          21228,
+          42229,
+          49567,
+          0,
+          36959,
+          36896,
+          40121
         ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
@@ -630,631 +525,70 @@
       2021
     ]
   },
-  "Srirampur": {
+  "Kankawali": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          25.376158493114705,
-          25.376135764472185,
-          32.41774694631249,
-          25.616069668372376,
-          25.375995505515615,
-          17.07347795661302,
-          25.378922064777328,
-          25.37897957305852,
-          25.37624740586627,
-          25.706490456565284
+          144517,
+          147584,
+          160439
         ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          24.623841506885295,
-          24.62386423552782,
-          17.58225305368751,
-          24.383930331627624,
-          24.624004494484385,
-          32.92652204338699,
-          24.621077935222672,
-          24.621020426941477,
-          24.62375259413373,
-          24.293509543434716
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
       2019,
       2020,
       2021
     ]
   },
-  "Nagar": {
+  "Savantwadi": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          25.631884258140257,
-          25.631976709743487,
-          32.417567216551575,
-          25.541190004846914,
-          25.624685692733216,
-          12.248107258077589,
-          25.730628140266692,
-          25.730587472933884,
-          25.730624443231125,
-          26.059913884468518
+          138510,
+          141435,
+          211532
         ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          24.368115741859743,
-          24.368023290256513,
-          17.58243278344843,
-          24.458809995153086,
-          24.375314307266784,
-          37.75189274192241,
-          24.269371859733305,
-          24.269412527066113,
-          24.269375556768875,
-          23.940086115531482
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
       2019,
       2020,
       2021
     ]
   },
-  "Parner": {
+  "Malwan": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          24.143181974781232,
-          24.143102260291556,
-          32.417906341501755,
-          24.18262067414467,
-          24.142401860325055,
-          26.42972629633907,
-          24.142437909089008,
-          24.142454294857576,
-          24.15626711243047,
-          24.486192617432614
+          117441,
+          119912,
+          100268
         ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          25.856818025218768,
-          25.856897739708444,
-          17.58209365849824,
-          25.817379325855335,
-          25.85759813967495,
-          23.57027370366093,
-          25.85756209091099,
-          25.85754570514242,
-          25.84373288756953,
-          25.51380738256739
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Shevgaon": {
-    "datasets": [
-      {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
-        "borderWidth": 1,
-        "data": [
-          23.848401168607676,
-          23.848417473188597,
-          32.418226702324624,
-          23.89280561831396,
-          23.848876004146152,
-          18.607216731785797,
-          23.848905084860142,
-          23.848947565382232,
-          23.84901535389815,
-          24.178885053741237
-        ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          26.151598831392324,
-          26.151582526811406,
-          17.581773297675376,
-          26.10719438168604,
-          26.151123995853848,
-          31.392783268214203,
-          26.15109491513986,
-          26.151052434617768,
-          26.15098464610185,
-          25.821114946258767
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Pathardi": {
-    "datasets": [
-      {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
-        "borderWidth": 1,
-        "data": [
-          24.37614203507241,
-          24.37601101589551,
-          32.41770205353619,
-          24.396594057204275,
-          24.375688046816155,
-          25.481287859928635,
-          24.375758746275245,
-          24.375760312025786,
-          24.375790949823852,
-          24.707079334773653
-        ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          25.623857964927595,
-          25.62398898410449,
-          17.582297946463807,
-          25.603405942795725,
-          25.62431195318385,
-          24.518712140071365,
-          25.624241253724755,
-          25.624239687974214,
-          25.624209050176145,
-          25.292920665226347
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Rahuri": {
-    "datasets": [
-      {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
-        "borderWidth": 1,
-        "data": [
-          25.16434312363564,
-          25.164463684229727,
-          32.41780682050235,
-          25.22622142688321,
-          25.163939980274503,
-          33.361785668558745,
-          25.163751348909578,
-          25.163836716535386,
-          25.163849424452973,
-          25.49402961893712
-        ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          24.83565687636436,
-          24.835536315770273,
-          17.58219317949765,
-          24.773778573116793,
-          24.8360600197255,
-          16.638214331441255,
-          24.836248651090422,
-          24.836163283464614,
-          24.836150575547027,
-          24.505970381062884
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Srigonda": {
-    "datasets": [
-      {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
-        "borderWidth": 1,
-        "data": [
-          25.120540629468863,
-          25.120659065248947,
-          32.41772479917077,
-          25.120065294900982,
-          25.115975422427034,
-          26.41159074757571,
-          25.11584741423451,
-          25.115643091961715,
-          25.115576666737194,
-          25.445856459151766
-        ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          24.879459370531137,
-          24.879340934751053,
-          17.58227520082923,
-          24.879934705099018,
-          24.884024577572962,
-          23.58840925242429,
-          24.88415258576549,
-          24.884356908038285,
-          24.884423333262806,
-          24.554143540848234
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Jamkhed": {
-    "datasets": [
-      {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
-        "borderWidth": 1,
-        "data": [
-          24.876215512620913,
-          24.87614162392093,
-          34.618927008979966,
-          24.852852073054617,
-          24.881096238458202,
-          21.557019238198254,
-          24.881063809185683,
-          24.881020145886026,
-          24.881166409705145,
-          25.211411273074262
-        ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          25.123784487379087,
-          25.123858376079067,
-          15.381072991020032,
-          25.147147926945383,
-          25.1189037615418,
-          28.442980761801746,
-          25.118936190814317,
-          25.118979854113977,
-          25.11883359029486,
-          24.788588726925735
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Karjat": {
-    "datasets": [
-      {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
-        "borderWidth": 1,
-        "data": [
-          25.789677419354838,
-          25.789373814041745,
-          32.41749658269869,
-          25.629641237257,
-          25.793361691460444,
-          29.26707410591871,
-          25.793332158268218,
-          25.793318734013447,
-          25.79297210097817,
-          26.12268656007222
-        ],
-        "label": "Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#1cc88a",
-        "borderColor": "#1cc88a",
-        "borderWidth": 1,
-        "data": [
-          24.210322580645162,
-          24.210626185958255,
-          17.58250341730131,
-          24.370358762743,
-          24.206638308539556,
-          20.732925894081287,
-          24.206667841731786,
-          24.206681265986553,
-          24.207027899021835,
-          23.877313439927775
-        ],
-        "label": "Non-Agriculture Loans"
-      },
-      {
-        "backgroundColor": "#36b9cc",
-        "borderColor": "#36b9cc",
-        "borderWidth": 1,
-        "data": [
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50,
-          50
-        ],
-        "label": "Total Loan"
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
       2019,
       2020,
       2021
@@ -1271,54 +605,21 @@
       "borderColor": "#4e73df",
       "borderWidth": 1,
       "data": [
-        24.73501166047932,
-        24.73549349192815,
-        32.5,
-        24.734982115733256,
-        24.735007004051287,
-        23.45869524669598,
-        18.976249279902287,
-        18.97625386698617,
-        18.976655648043895,
-        19.288782393024416
+        0,
+        366596,
+        366596,
+        403048,
+        624587,
+        708101,
+        0,
+        870585,
+        882431,
+        985227
       ],
-      "label": "Agriculture Loans"
-    },
-    {
-      "backgroundColor": "#1cc88a",
-      "borderColor": "#1cc88a",
-      "borderWidth": 1,
-      "data": [
-        25.264988339520677,
-        25.26450650807185,
-        17.5,
-        25.265017884266744,
-        25.26499299594871,
-        26.54130475330402,
-        31.023750720097716,
-        31.02374613301383,
-        31.023344351956105,
-        30.711217606975584
-      ],
-      "label": "Non-Agriculture Loans"
-    },
-    {
-      "backgroundColor": "#36b9cc",
-      "borderColor": "#36b9cc",
-      "borderWidth": 1,
-      "data": [
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50
-      ],
-      "label": "Total Loan"
+      "fill": false,
+      "label": "Deposits",
+      "spanGaps": false,
+      "tension": 0
     }
   ],
   "labels": [
@@ -1356,7 +657,7 @@
       "callbacks": {}
     },
     "datalabels": {
-      "display": true,
+      "display": false,
       "color": "white",
       "font": {
         "weight": "normal"
@@ -1366,18 +667,16 @@
   "scales": {
     "x": {
       "axis": "x",
-      "stacked": true,
-      "type": "category",
-      "offset": true,
       "grid": {
-        "offset": true,
-        "display": true,
+        "display": false,
         "lineWidth": 1,
         "drawOnChartArea": true,
         "drawTicks": true,
         "tickLength": 8,
+        "offset": false,
         "color": "rgba(0,0,0,0.1)"
       },
+      "type": "category",
       "ticks": {
         "minRotation": 0,
         "maxRotation": 50,
@@ -1399,6 +698,7 @@
         "color": "#666"
       },
       "display": true,
+      "offset": false,
       "reverse": false,
       "beginAtZero": false,
       "bounds": "ticks",
@@ -1425,9 +725,6 @@
     },
     "y": {
       "axis": "y",
-      "stacked": true,
-      "min": 0,
-      "max": 100,
       "ticks": {
         "minRotation": 0,
         "maxRotation": 50,
@@ -1449,10 +746,10 @@
         "color": "#666"
       },
       "type": "linear",
-      "beginAtZero": true,
       "display": true,
       "offset": false,
       "reverse": false,
+      "beginAtZero": false,
       "bounds": "ticks",
       "clip": true,
       "grace": 0,
@@ -1484,15 +781,16 @@
       "id": "y",
       "position": "left"
     }
-  }
+  },
+  "spanGaps": false
 };
         
         // Register plugins if needed
-        Chart.register(ChartDataLabels);
+        
 
         // Create chart with exact same configuration but remove redundant title
         const chart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: chartData,
             options: {
                 ...chartOptions,
@@ -1503,14 +801,14 @@
                         display: false
                     },
                     datalabels: {
-                        display: true,
+                        display: false,
                         color: 'white',
                         font: {
                             weight: 'normal'
                         },
                         formatter: function(value) {
-                            if (true) {
-                                return Math.round(context.parsed.y);
+                            if (false) {
+                                return parseFloat(value).toFixed(1) + '%';
                             }
                             return null;
                         }
@@ -1526,10 +824,12 @@
                                     label += ': ';
                                 }
                                 
-                                if (true) {
+                                if (false) {
                                     label += parseFloat(context.parsed.y).toFixed(1) + '%';
-                                } else if (context.parsed.y !== null) {
+                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
                                     label += formatIndianNumber(context.parsed.y);
+                                } else {
+                                    label += 'No data'; // For null values, show 'No data' in tooltip
                                 }
                                 return label;
                             }
@@ -1545,88 +845,20 @@
                         ...chartOptions.scales?.y,
                         ticks: {
                             callback: function(value) {
-                                if (true) {
+                                if (false) {
                                     return value + '%';
                                 }
                                 return formatIndianNumber(value);
                             }
                         }
                     }
-                }
+                },
+                spanGaps: false // Don't connect points across null values for line charts
             }
         });
 
         // If it's a percentage stacked bar chart, store original data for calculations
-        chart.originalData = {
-  "datasets": [
-    {
-      "backgroundColor": "#4e73df",
-      "borderColor": "#4e73df",
-      "borderWidth": 1,
-      "data": [
-        24.73501166047932,
-        24.73549349192815,
-        32.5,
-        24.734982115733256,
-        24.735007004051287,
-        23.45869524669598,
-        18.976249279902287,
-        18.97625386698617,
-        18.976655648043895,
-        19.288782393024416
-      ],
-      "label": "Agriculture Loans"
-    },
-    {
-      "backgroundColor": "#1cc88a",
-      "borderColor": "#1cc88a",
-      "borderWidth": 1,
-      "data": [
-        25.264988339520677,
-        25.26450650807185,
-        17.5,
-        25.265017884266744,
-        25.26499299594871,
-        26.54130475330402,
-        31.023750720097716,
-        31.02374613301383,
-        31.023344351956105,
-        30.711217606975584
-      ],
-      "label": "Non-Agriculture Loans"
-    },
-    {
-      "backgroundColor": "#36b9cc",
-      "borderColor": "#36b9cc",
-      "borderWidth": 1,
-      "data": [
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50,
-        50
-      ],
-      "label": "Total Loan"
-    }
-  ],
-  "labels": [
-    2012,
-    2013,
-    2014,
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
-    2020,
-    2021
-  ]
-};
+        
 
         // Create custom legend container
         const legendContainer = document.createElement('div');
@@ -1669,7 +901,7 @@
                         '#999';
 
                     // If it's a percentage stacked bar chart, recalculate percentages
-                    if (true) {
+                    if (false) {
                         recalculatePercentages(chart);
                     } else {
                         chart.update();
@@ -1703,7 +935,7 @@
                     });
                     
                     // Set originalData for percentage calculations
-                    if (true) {
+                    if (false) {
                         chart.originalData = JSON.parse(JSON.stringify(originalChartData));
                     }
                     
@@ -1725,7 +957,7 @@
                         });
                         
                         // Store original data for percentage calculations
-                        if (true) {
+                        if (false) {
                             chart.originalData = JSON.parse(JSON.stringify(filteredData));
                         }
                     }
@@ -1733,7 +965,7 @@
                     // Fallback to client-side filtering if no pre-filtered data is available
                     console.log("No pre-filtered data available for " + filterValue + ", using fallback filter");
                     
-                    if ('bar' === 'pie' || 'bar' === 'doughnut' || 'bar' === 'polarArea') {
+                    if ('line' === 'pie' || 'line' === 'doughnut' || 'line' === 'polarArea') {
                         // For pie/doughnut/polarArea, filter by label
                         let matchedIndex = -1;
                         originalChartData.labels.forEach((label, i) => {
@@ -1797,7 +1029,7 @@
                 chart.update();
                 
                 // For percentage stacked bar charts, make sure to recalculate percentages
-                if (true) {
+                if (false) {
                     // Call with a small delay to ensure chart has updated
                     setTimeout(() => recalculatePercentages(chart), 50);
                 }
@@ -1851,74 +1083,6 @@
 
         // Add the recalculatePercentages function if it's a percentage stacked bar chart
         
-        function recalculatePercentages(chart) {
-            if (!chart || !chart.data || !chart.data.datasets) {
-                return;
-            }
-
-            // Store the current dataset visibility
-            const visibleDatasets = [];
-            chart.data.datasets.forEach((dataset, index) => {
-                const meta = chart.getDatasetMeta(index);
-                if (!meta || !meta.hidden) {
-                    visibleDatasets.push(index);
-                }
-            });
-
-            // We need to work with the original data (non-percentage) to recalculate
-            const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
-            
-            if (!originalData || !originalData.datasets) {
-                console.error("Missing original data for percentage calculation");
-                return;
-            }
-
-            // Calculate totals for each data point using only visible datasets
-            const totals = Array(chart.data.labels.length).fill(0);
-            visibleDatasets.forEach(datasetIndex => {
-                if (datasetIndex < originalData.datasets.length) {
-                    const dataArray = originalData.datasets[datasetIndex].data;
-                    dataArray.forEach((value, index) => {
-                        if (index < totals.length) {
-                            totals[index] += Math.abs(parseFloat(value) || 0);
-                        }
-                    });
-                }
-            });
-
-            // Update percentages for all datasets
-            chart.data.datasets.forEach((dataset, datasetIndex) => {
-                const meta = chart.getDatasetMeta(datasetIndex);
-                
-                if (meta) {
-                    if (!meta.hidden && datasetIndex < originalData.datasets.length) {
-                        const dataArray = originalData.datasets[datasetIndex].data;
-                        dataset.data = dataArray.map((value, index) => {
-                            if (index < totals.length && totals[index] > 0) {
-                                return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
-                            }
-                            return 0;
-                        });
-                    } else {
-                        // Hidden datasets get zeros
-                        dataset.data = Array(chart.data.labels.length).fill(0);
-                    }
-                }
-            });
-
-            chart.update({
-                duration: 300,
-                easing: 'easeOutQuad'
-            });
-        }
-        
-        // Make sure to call recalculatePercentages after initial chart setup
-        setTimeout(() => {
-            if ('bar' === 'bar' && chart.options.scales && 
-                chart.options.scales.y && chart.options.scales.y.stacked) {
-                recalculatePercentages(chart);
-            }
-        }, 200);
 
         // Add download functionality
         document.getElementById('downloadChartBtn').addEventListener('click', function() {
