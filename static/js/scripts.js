@@ -31,15 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const downloadCodeBtn = document.getElementById('downloadCodeBtn');
     const copyDataBtn = document.getElementById('copyDataBtn');
     
-    // Add this after the DOM elements declarations at the top
-
+    // Y-axis range inputs
     const yMinValueInput = document.getElementById('yMinValue');
     const yMaxValueInput = document.getElementById('yMaxValue');
     const applyYAxisRangeBtn = document.getElementById('applyYAxisRange');
     const resetYAxisRangeBtn = document.getElementById('resetYAxisRange');
     
-    // Add these variables after the other DOM element declarations
-
+    // Chart description and sharing
     const chartDescription = document.getElementById('chartDescription');
     const chartAdditionalInfo = document.getElementById('chartAdditionalInfo');
     const shareChartBtn = document.getElementById('shareChartBtn');
@@ -57,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let sheetData = [];
     let columns = [];
     let currentChart = null;
-    let selectedChartType = '';
+    const selectedChartType = 'line'; // Always line chart
     
     // File upload handling
     excelFileInput.addEventListener('change', function(e) {
@@ -432,29 +430,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Chart type selection
-    document.querySelectorAll('.chart-type-card').forEach(card => {
-        card.addEventListener('click', function() {
-            // Remove selected class from all cards
-            document.querySelectorAll('.chart-type-card').forEach(c => {
-                c.classList.remove('selected');
-            });
-            
-            // Add selected class to clicked card
-            this.classList.add('selected');
-            
-            // Store selected chart type
-            selectedChartType = this.dataset.type;
-        });
-    });
-    
     // Generate chart
     generateChartBtn.addEventListener('click', function() {
-        if (!selectedChartType) {
-            alert('Please select a chart type');
-            return;
-        }
-        
         // Get selected axes
         const xAxis = xAxisSelect.value;
         const yAxes = Array.from(document.querySelectorAll('.y-axis-item')).map(item => {
@@ -499,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chartDisplay.classList.remove('hidden');
                 
                 // Create chart
-                createChart(data.chartData, data.chartType);
+                createChart(data.chartData);
                 
                 // Scroll to chart
                 chartDisplay.scrollIntoView({ behavior: 'smooth' });
@@ -523,8 +500,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Create chart with Chart.js
-    function createChart(chartData, chartType) {
+    // Create line chart with Chart.js
+    function createChart(chartData) {
         // Clean up existing custom legend if any
         const existingLegend = chartCanvas.parentElement.querySelector('.custom-legend');
         if (existingLegend) {
@@ -546,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
         
         // Set appropriate height for the chart container
-        chartCanvas.parentElement.style.height = '520px'; // Increase the height to show bottom properly
+        chartCanvas.parentElement.style.height = '520px';
         
         // Apply color palette to datasets if not already set
         for (let i = 0; i < chartData.datasets.length; i++) {
@@ -559,20 +536,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // For pie/doughnut/polarArea charts, set multiple background colors from palette
-        if (['pie', 'doughnut', 'polarArea'].includes(getChartJsType(chartType)) && 
-            chartData.datasets && chartData.datasets[0]) {
-            const count = chartData.labels.length;
-            const colors = [];
-            for (let i = 0; i < count; i++) {
-                colors.push(colorPalette[i % colorPalette.length]);
-            }
-            chartData.datasets[0].backgroundColor = colors;
-        }
+        chartData.datasets.forEach(dataset => {
+            dataset.fill = false;
+            dataset.tension = 0; // Smooth line
+            dataset.borderWidth = 1;
+            dataset.pointRadius = 2;
+            dataset.pointBackgroundColor = dataset.borderColor;
+            dataset.pointHoverRadius = 4;
+            dataset.pointBorderWidth = 5;
+            dataset.spanGaps = false; // Don't connect points across null values
+            
+            // Log the dataset to check for nulls
+            console.log(`Dataset ${dataset.label} values:`, dataset.data);
+            
+            // Make sure null values are preserved (not converted to 0)
+            dataset.data = dataset.data.map(value => 
+                value === null || value === undefined || Number.isNaN(value) ? null : value
+            );
+        });
         
-        // Set chart configuration based on chart type
-        let config = {
-            type: getChartJsType(chartType),
+        // Set chart configuration for line charts
+        const config = {
+            type: 'line',
             data: chartData,
             options: {
                 responsive: true,
@@ -582,283 +567,89 @@ document.addEventListener('DOMContentLoaded', function() {
                     easing: 'easeInOutQuart'
                 },
                 plugins: {
-                    title: {
-                        display: false,
-                        text: ''
-                    },
+                    
                     legend: {
                         display: false,
-                    },
-                    tooltip: {
-                        backgroundColor: 'yellow', // Change tooltip background to yellow
-                        titleColor: 'black', // Change title text color (optional)
-                        bodyColor: 'black', // Change body text color (optional)
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                
-                                if (chartType === 'percentStackedBar') {
-                                    // Get original value from original data
-                                    const originalValue = currentChart.originalData.datasets[context.datasetIndex].data[context.dataIndex];
-                                    label += parseFloat(context.parsed.y).toFixed(1) + '% (' + formatIndianNumber(originalValue) + ')';
-                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
-                                    label += formatIndianNumber(context.parsed.y);
-                                } else {
-                                    // For null values, show 'No data' in tooltip
-                                    label += 'No data';
-                                }
-                                return label;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: chartType === 'percentStackedBar',
-                        color: 'white',
-                        font: {
-                            weight: 'normal' // Regular style as requested
-                        },
-                        formatter: function(value) {
-                            if (chartType === 'percentStackedBar') {
-                                return parseFloat(value).toFixed(1) + '%';
-                            }
-                            return formatIndianNumber(value);
-                        }
-                    }
+                      }
                 },
                 scales: {
                     x: {
                         grid: {
-                            display: false // Remove vertical grid lines
+                            display: false
                         }
                     },
                     y: {
                         ticks: {
                             callback: function(value) {
-                                if (chartType === 'percentStackedBar') {
-                                    return value + '%';
-                                } else {
-                                    return formatIndianNumber(value);
-                                }
+                                return formatIndianNumber(value);
                             }
                         }
                     }
                 },
-                spanGaps: chartType === 'line' ? false : true // Don't connect points across null values for line charts
+                spanGaps: false // Important: this must be false to break lines at null values
             }
         };
         
-        // Add special configurations for certain chart types
-        if (chartType === 'stackedBar') {
-            config.type = 'bar';
-            config.options.scales = {
-                x: {
-                    stacked: true,
-                    grid: {
-                        display: false // Remove vertical grid lines
-                    }
-                },
-                y: {
-                    stacked: true,
-                    ticks: {
-                        callback: function(value) {
-                            return formatIndianNumber(value);
-                        }
-                    }
-                }
-            };
-        } else if (chartType === 'percentStackedBar') {
-            config.type = 'bar';
-            config.options.scales = {
-                x: {
-                    stacked: true,
-                    grid: {
-                        display: false // Remove vertical grid lines
-                    }
-                },
-                y: {
-                    stacked: true,
-                    min: 0,
-                    max: 100,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '%';
-                        }
-                    }
-                }
-            };
-            
-            // Add custom plugin for percentage calculation
-            const percentageRecalculationPlugin = {
-                id: 'percentageRecalculation',
-                beforeInit: function(chart) {
-                    // Save the original data
-                    chart.originalData = JSON.parse(JSON.stringify(chartData));
-                    
-                    // Override the legend click handler
-                    Chart.defaults.plugins.legend.onClick = function(e, legendItem, legend) {
-                        if (!legend || !legend.chart) return;
-                        
-                        const chart = legend.chart;
-                        const index = legendItem.datasetIndex;
-                        
-                        if (index === undefined) return;
-                        
-                        // Toggle visibility
-                        const meta = chart.getDatasetMeta(index);
-                        if (meta) {
-                            meta.hidden = !meta.hidden;
-                        }
-                        
-                        // Recalculate percentages safely
-                        try {
-                            recalculatePercentages(chart);
-                        } catch (error) {
-                            console.warn('Error in legend click handler:', error);
-                        }
-                    };
-                }
-            };
-            
-            // Add the plugin to config
-            if (!config.plugins) {
-                config.plugins = [];
-            }
-            config.plugins.push(percentageRecalculationPlugin);
-        }
-        
-        // For scatter and bubble charts, format axes
-        if (['scatter', 'bubble'].includes(chartType)) {
-            config.options.scales = {
-                x: {
-                    ticks: {
-                        callback: function(value) {
-                            return formatIndianNumber(value);
-                        }
-                    },
-                    grid: {
-                        display: false // Remove vertical grid lines
-                    }
-                    
-                },
-                y: {
-                    ticks: {
-                        callback: function(value) {
-                            return formatIndianNumber(value);
-                        }
-                    }
-                }
-            };
-        }
-        
-        // Register ChartDataLabels plugin if present and using percentage stacked bar
-        if (window.ChartDataLabels && chartType === 'percentStackedBar') {
-            Chart.register(ChartDataLabels);
-        }
-        
-        // Special handling for pie/doughnut/polarArea charts
-        if (['pie', 'doughnut', 'polarArea'].includes(getChartJsType(chartType))) {
-            config.options.plugins.tooltip = {
-                callbacks: {
-                    label: function(context) {
-                        const label = context.label || '';
-                        const value = context.raw;
-                        const percentage = ((value / context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
-                        return `${label}: ${formatIndianNumber(value)} (${percentage}%)`;
-                    }
-                }
-            };
-        }
+        // Log the final config before creating the chart
+        console.log("Final chart configuration:", config);
         
         // Create the chart
-        currentChart = new Chart(chartCanvas, config);
+        try {
+            currentChart = new Chart(ctx, config);
+            console.log("Chart created successfully");
+        } catch (error) {
+            console.error("Error creating chart:", error);
+            alert("Error creating chart: " + error.message);
+        }
         
-        // Store original data for recalculation when needed
-        if (chartType === 'percentStackedBar') {
-            currentChart.originalData = JSON.parse(JSON.stringify(chartData));
-        }
-    }
-    
-    // Replace the existing recalculatePercentages function with this one
-    function recalculatePercentages(chart) {
-        if (!chart || !chart.data || !chart.data.datasets) {
-            return;
-        }
-
-        // Store the current dataset visibility
-        const visibleDatasets = [];
-        chart.data.datasets.forEach((dataset, index) => {
-            const meta = chart.getDatasetMeta(index);
-            if (!meta || !meta.hidden) {
-                visibleDatasets.push(index);
-            }
-        });
-
-        // We need to work with the original data (non-percentage) to recalculate
-        const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
+        // Create custom legend
+        const legendContainer = document.createElement('div');
+        legendContainer.className = 'custom-legend';
         
-        if (!originalData || !originalData.datasets) {
-            console.error("Missing original data for percentage calculation");
-            return;
-        }
-
-        // Calculate totals for each data point using only visible datasets
-        const totals = Array(chart.data.labels.length).fill(0);
-        visibleDatasets.forEach(datasetIndex => {
-            if (datasetIndex < originalData.datasets.length) {
-                const dataArray = originalData.datasets[datasetIndex].data;
-                dataArray.forEach((value, index) => {
-                    if (index < totals.length) {
-                        totals[index] += Math.abs(parseFloat(value) || 0);
-                    }
-                });
-            }
-        });
-
-        // Update percentages for all datasets
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-            const meta = chart.getDatasetMeta(datasetIndex);
+        chartData.datasets.forEach((dataset, index) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.style.backgroundColor = dataset.borderColor + '15';
+            legendItem.style.border = '1px solid ' + dataset.borderColor + '40';
             
-            if (meta) {
-                if (!meta.hidden && datasetIndex < originalData.datasets.length) {
-                    const dataArray = originalData.datasets[datasetIndex].data;
-                    dataset.data = dataArray.map((value, index) => {
-                        if (index < totals.length && totals[index] > 0) {
-                            return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
-                        }
-                        return 0;
-                    });
-                } else {
-                    // Hidden datasets get zeros
-                    dataset.data = Array(chart.data.labels.length).fill(0);
-                }
-            }
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true;
+            
+            const label = document.createElement('span');
+            label.textContent = dataset.label;
+            label.style.color = dataset.borderColor;
+            
+            legendItem.appendChild(checkbox);
+            legendItem.appendChild(label);
+            
+            // Add click handlers
+            [checkbox, label, legendItem].forEach(element => {
+                element.addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    
+                    const meta = currentChart.getDatasetMeta(index);
+                    meta.hidden = !checkbox.checked;
+                    
+                    // Update legend item appearance
+                    legendItem.style.backgroundColor = checkbox.checked ? 
+                        dataset.borderColor + '15' : 
+                        '#f5f5f5';
+                    label.style.color = checkbox.checked ? 
+                        dataset.borderColor : 
+                        '#999';
+                    
+                    currentChart.update();
+                });
+            });
+            
+            legendContainer.appendChild(legendItem);
         });
-
-        chart.update({
-            duration: 300,
-            easing: 'easeOutQuad'
-        });
-    }
-    
-    // Map chart types to Chart.js types
-    function getChartJsType(type) {
-        const typeMap = {
-            'bar': 'bar',
-            'stackedBar': 'bar',
-            'percentStackedBar': 'bar',
-            'line': 'line',
-            'pie': 'pie',
-            'doughnut': 'doughnut',
-            'scatter': 'scatter',
-            'radar': 'radar',
-            'polarArea': 'polarArea',
-            'bubble': 'bubble'
-        };
         
-        return typeMap[type] || 'bar';
+        // Add legend to the chart container
+        chartCanvas.parentElement.insertBefore(legendContainer, chartCanvas);
     }
     
     // Format number in Indian format (e.g., 1,00,000)
@@ -923,25 +714,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Apply axis labels
     applyAxisLabelsBtn.addEventListener('click', function() {
         if (currentChart) {
-            // Only apply to chart types that have axes
-            const chartType = currentChart.config.type;
-            if (['bar', 'line', 'scatter', 'bubble'].includes(chartType)) {
-                if (!currentChart.options.scales) {
-                    currentChart.options.scales = { x: {}, y: {} };
-                }
-                
-                currentChart.options.scales.x.title = {
-                    display: !!xAxisLabelInput.value,
-                    text: xAxisLabelInput.value
-                };
-                
-                currentChart.options.scales.y.title = {
-                    display: !!yAxisLabelInput.value,
-                    text: yAxisLabelInput.value
-                };
-                
-                currentChart.update();
+            if (!currentChart.options.scales) {
+                currentChart.options.scales = { x: {}, y: {} };
             }
+            
+            currentChart.options.scales.x.title = {
+                display: !!xAxisLabelInput.value,
+                text: xAxisLabelInput.value
+            };
+            
+            currentChart.options.scales.y.title = {
+                display: !!yAxisLabelInput.value,
+                text: yAxisLabelInput.value
+            };
+            
+            currentChart.update();
         }
     });
     
@@ -956,16 +743,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingMessage.className = 'chart-loading-message';
         loadingMessage.textContent = 'Updating chart...';
         document.body.appendChild(loadingMessage);
-        
-        // Get visible datasets
-        const visibleDatasets = [];
-        if (currentChart && selectedChartType === 'percentStackedBar') {
-            currentChart.data.datasets.forEach((dataset, index) => {
-                if (!currentChart.getDatasetMeta(index).hidden) {
-                    visibleDatasets.push(index);
-                }
-            });
-        }
         
         // Send request to apply filter
         fetch('/apply_chart_filter', {
@@ -989,8 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 filterColumn: filterColumnSelect.value,
                 filterValue: filterValueSelect.value,
                 chartFilterColumn: filterColumn2Select.value,
-                chartFilterValue: filterValue,
-                visibleDatasets: visibleDatasets // Pass visible datasets for percentage calculation
+                chartFilterValue: filterValue
             })
         })
         .then(response => response.json())
@@ -1001,21 +777,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 // Update chart with filtered data
                 updateChart(data.chartData);
-                
-                // If it's a percentage stacked bar and we have hidden datasets, recalculate
-                if (selectedChartType === 'percentStackedBar' && currentChart) {
-                    // Store updated original data
-                    currentChart.originalData = JSON.parse(JSON.stringify(data.chartData));
-                    
-                    // Apply visibility from current chart to new data
-                    currentChart.data.datasets.forEach((dataset, index) => {
-                        const meta = currentChart.getDatasetMeta(index);
-                        meta.hidden = meta.hidden || false; // Ensure value is defined
-                    });
-                    
-                    // Recalculate percentages based on visible datasets
-                    recalculatePercentages(currentChart);
-                }
             } else {
                 alert('Error applying filter: ' + data.error);
             }
@@ -1027,7 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add this function to update an existing chart with new data
+    // Function to update an existing chart with new data
     function updateChart(chartData) {
         if (!currentChart) return;
         
@@ -1056,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
     downloadImageBtn.addEventListener('click', function() {
         if (currentChart) {
             const link = document.createElement('a');
-            link.download = 'chart.png';
+            link.download = 'line_chart.png';
             link.href = chartCanvas.toDataURL('image/png');
             link.click();
         }
@@ -1064,134 +825,132 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Download chart code
     downloadCodeBtn.addEventListener('click', function() {
-    if (currentChart) {
-        const chartConfig = currentChart.config;
-        const chartType = chartConfig.type;
-        const chartTitle = chartTitleInput.value || 'Untitled Chart';
-        const description = chartDescription.value || '';
-        const additionalInfo = chartAdditionalInfo.value || '';
-        
-        // Get chart filter information
-        const chartFilterColumn = filterColumn2Select.value;
-        const chartFilterOptions = Array.from(chartFilterValue.options).map(opt => opt.value);
-        const selectedFilterValue = chartFilterValue.value;
-        
-        // Create loading indicator message for user feedback
-        const loadingDiv = document.createElement('div');
-        loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; z-index: 9999;';
-        loadingDiv.textContent = 'Preparing chart data for all districts...';
-        document.body.appendChild(loadingDiv);
-        
-        // Pre-generate filtered data for each filter option
-        const preFilteredData = {};
-        
-        // Track the number of fetch operations and completions
-        let fetchCount = 0;
-        let completedFetches = 0;
-        
-        // Only process if there are filter options
-        if (chartFilterColumn && chartFilterOptions.length > 0) {
-            // Save current chart data and state
-            const currentLabels = [...currentChart.data.labels];
-            const currentDatasets = JSON.parse(JSON.stringify(currentChart.data.datasets));
-            const currentVisibility = [];
-            currentChart.data.datasets.forEach((dataset, i) => {
-                currentVisibility.push(!currentChart.getDatasetMeta(i).hidden);
-            });
+        if (currentChart) {
+            const chartConfig = currentChart.config;
+            const chartTitle = chartTitleInput.value || 'Untitled Line Chart';
+            const description = chartDescription.value || '';
+            const additionalInfo = chartAdditionalInfo.value || '';
             
-            // Process each filter option sequentially for more reliable results
-            const processFilterOptions = async () => {
-                // Create an array of promises for fetch operations
-                const fetchPromises = [];
+            // Get chart filter information
+            const chartFilterColumn = filterColumn2Select.value;
+            const chartFilterOptions = Array.from(chartFilterValue.options).map(opt => opt.value);
+            const selectedFilterValue = chartFilterValue.value;
+            
+            // Create loading indicator message for user feedback
+            const loadingDiv = document.createElement('div');
+            loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 8px; z-index: 9999;';
+            loadingDiv.textContent = 'Preparing chart data...';
+            document.body.appendChild(loadingDiv);
+            
+            // Pre-generate filtered data for each filter option
+            const preFilteredData = {};
+            
+            // Track the number of fetch operations and completions
+            let fetchCount = 0;
+            let completedFetches = 0;
+            
+            // Only process if there are filter options
+            if (chartFilterColumn && chartFilterOptions.length > 0) {
+                // Save current chart data and state
+                const currentLabels = [...currentChart.data.labels];
+                const currentDatasets = JSON.parse(JSON.stringify(currentChart.data.datasets));
+                console.log(currentDatasets)
+                const currentVisibility = [];
+                currentChart.data.datasets.forEach((dataset, i) => {
+                    currentVisibility.push(!currentChart.getDatasetMeta(i).hidden);
+                });
                 
-                for (const filterOption of chartFilterOptions) {
-                    if (!filterOption) {
-                        // Skip empty option (All Values)
-                        continue;
+                // Process each filter option sequentially for more reliable results
+                const processFilterOptions = async () => {
+                    // Create an array of promises for fetch operations
+                    const fetchPromises = [];
+                    
+                    for (const filterOption of chartFilterOptions) {
+                        if (!filterOption) {
+                            // Skip empty option (All Values)
+                            continue;
+                        }
+                        
+                        // Create a promise for this fetch operation
+                        const fetchPromise = fetch('/apply_chart_filter', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                filename: currentFileName,
+                                sheet: currentSheetName,
+                                xAxis: xAxisSelect.value,
+                                yAxes: Array.from(document.querySelectorAll('.y-axis-item')).map(item => {
+                                    return {
+                                        column: item.querySelector('.y-axis-select').value,
+                                        color: item.querySelector('.series-color').value
+                                    };
+                                }),
+                                chartType: selectedChartType,
+                                startRow: parseInt(startRowInput.value),
+                                endRow: parseInt(endRowInput.value),
+                                filterColumn: filterColumnSelect.value,
+                                filterValue: filterValueSelect.value,
+                                chartFilterColumn: chartFilterColumn,
+                                chartFilterValue: filterOption
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Store the filtered data
+                                preFilteredData[filterOption] = data.chartData;
+                            }
+                            completedFetches++;
+                            
+                            // Update the loading message to show progress
+                            loadingDiv.textContent = `Preparing chart data... (${completedFetches}/${fetchCount})`;
+                        })
+                        .catch(error => {
+                            console.error('Error pre-filtering data for ' + filterOption, error);
+                            completedFetches++;
+                            loadingDiv.textContent = `Preparing chart data... (${completedFetches}/${fetchCount})`;
+                        });
+                        
+                        fetchPromises.push(fetchPromise);
+                        fetchCount++;
                     }
                     
-                    // Create a promise for this fetch operation
-                    const fetchPromise = fetch('/apply_chart_filter', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            filename: currentFileName,
-                            sheet: currentSheetName,
-                            xAxis: xAxisSelect.value,
-                            yAxes: Array.from(document.querySelectorAll('.y-axis-item')).map(item => {
-                                return {
-                                    column: item.querySelector('.y-axis-select').value,
-                                    color: item.querySelector('.series-color').value
-                                };
-                            }),
-                            chartType: selectedChartType,
-                            startRow: parseInt(startRowInput.value),
-                            endRow: parseInt(endRowInput.value),
-                            filterColumn: filterColumnSelect.value,
-                            filterValue: filterValueSelect.value,
-                            chartFilterColumn: chartFilterColumn,
-                            chartFilterValue: filterOption
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Store the filtered data
-                            preFilteredData[filterOption] = data.chartData;
-                        }
-                        completedFetches++;
-                        
-                        // Update the loading message to show progress
-                        loadingDiv.textContent = `Preparing chart data... (${completedFetches}/${fetchCount})`;
-                    })
-                    .catch(error => {
-                        console.error('Error pre-filtering data for ' + filterOption, error);
-                        completedFetches++;
-                        loadingDiv.textContent = `Preparing chart data... (${completedFetches}/${fetchCount})`;
-                    });
+                    // Wait for all fetch operations to complete
+                    return Promise.all(fetchPromises);
+                };
+                
+                // Execute the fetch operations and then generate the HTML
+                processFilterOptions().then(() => {
+                    // Remove loading message
+                    document.body.removeChild(loadingDiv);
                     
-                    fetchPromises.push(fetchPromise);
-                    fetchCount++;
-                }
-                
-                // Wait for all fetch operations to complete
-                return Promise.all(fetchPromises);
-            };
-            
-            // Execute the fetch operations and then generate the HTML
-            processFilterOptions().then(() => {
-                // Remove loading message
-                document.body.removeChild(loadingDiv);
-                
-                // Restore original chart state
-                currentChart.data.labels = currentLabels;
-                currentChart.data.datasets.forEach((dataset, i) => {
-                    Object.assign(dataset, currentDatasets[i]);
-                    currentChart.getDatasetMeta(i).hidden = !currentVisibility[i];
+                    // Restore original chart state
+                    currentChart.data.labels = currentLabels;
+                    currentChart.data.datasets.forEach((dataset, i) => {
+                        Object.assign(dataset, currentDatasets[i]);
+                        currentChart.getDatasetMeta(i).hidden = !currentVisibility[i];
+                    });
+                    currentChart.update();
+                    
+                    // Now continue with the HTML generation
+                    generateAndDownloadHTML();
                 });
-                currentChart.update();
-                
-                // Now continue with the HTML generation
+            } else {
+                // No filter options, just generate HTML
+                document.body.removeChild(loadingDiv);
                 generateAndDownloadHTML();
-            });
-        } else {
-            // No filter options, just generate HTML
-            document.body.removeChild(loadingDiv);
-            generateAndDownloadHTML();
-        }
-        
-        function generateAndDownloadHTML() {
-            // Create HTML template with embedded chart and info
-            const html = `
+            }
+            
+            function generateAndDownloadHTML() {
+                // Create HTML template for line chart
+                const html = `
 <!DOCTYPE html>
 <html>
 <head>
     <title>${chartTitle}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Add Chart.js plugin for data labels if needed -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -1401,13 +1160,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('myChart').getContext('2d');
         const chartData = ${JSON.stringify(chartConfig.data, null, 2)};
         const chartOptions = ${JSON.stringify(chartConfig.options, null, 2)};
-        
-        // Register plugins if needed
-        ${selectedChartType === 'percentStackedBar' ? 'Chart.register(ChartDataLabels);' : ''}
 
         // Create chart with exact same configuration but remove redundant title
         const chart = new Chart(ctx, {
-            type: '${chartType}',
+            type: 'line',
             data: chartData,
             options: {
                 ...chartOptions,
@@ -1417,23 +1173,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: false
                     },
-                    datalabels: {
-                        display: ${selectedChartType === 'percentStackedBar' ? 'true' : 'false'},
-                        color: 'white',
-                        font: {
-                            weight: 'normal'
-                        },
-                        formatter: function(value) {
-                            if (${selectedChartType === 'percentStackedBar'}) {
-                                return parseFloat(value).toFixed(1) + '%';
-                            }
-                            return null;
-                        }
-                    },
                     tooltip: {
-                        backgroundColor: 'yellow', // Change tooltip background to yellow
-                        titleColor: 'black', // Change title text color (optional)
-                        bodyColor: 'black', // Change body text color (optional)
+                        backgroundColor: 'yellow', // Yellow tooltip background
+                        titleColor: 'black',
+                        bodyColor: 'black',
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -1441,9 +1184,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     label += ': ';
                                 }
                                 
-                                if (${selectedChartType === 'percentStackedBar'}) {
-                                    label += parseFloat(context.parsed.y).toFixed(1) + '%';
-                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
+                                if (context.parsed.y !== null && context.parsed.y !== undefined) {
                                     label += formatIndianNumber(context.parsed.y);
                                 } else {
                                     label += 'No data'; // For null values, show 'No data' in tooltip
@@ -1462,20 +1203,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         ...chartOptions.scales?.y,
                         ticks: {
                             callback: function(value) {
-                                if (${selectedChartType === 'percentStackedBar'}) {
-                                    return value + '%';
-                                }
                                 return formatIndianNumber(value);
                             }
                         }
                     }
                 },
-                spanGaps: ${chartType === 'line' ? 'false' : 'true'} // Don't connect points across null values for line charts
+                spanGaps: false // Don't connect points across null values for line charts
             }
         });
-
-        // If it's a percentage stacked bar chart, store original data for calculations
-        ${selectedChartType === 'percentStackedBar' ? `chart.originalData = ${JSON.stringify(currentChart.originalData, null, 2)};` : ''}
 
         // Create custom legend container
         const legendContainer = document.createElement('div');
@@ -1486,8 +1221,8 @@ document.addEventListener('DOMContentLoaded', function() {
         chartData.datasets.forEach((dataset, index) => {
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
-            legendItem.style.backgroundColor = dataset.backgroundColor + '15';
-            legendItem.style.border = '1px solid ' + dataset.backgroundColor + '40';
+            legendItem.style.backgroundColor = dataset.borderColor + '15';
+            legendItem.style.border = '1px solid ' + dataset.borderColor + '40';
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -1495,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const label = document.createElement('span');
             label.textContent = dataset.label;
-            label.style.color = dataset.backgroundColor;
+            label.style.color = dataset.borderColor;
 
             legendItem.appendChild(checkbox);
             legendItem.appendChild(label);
@@ -1511,18 +1246,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Update legend item appearance
                     legendItem.style.backgroundColor = checkbox.checked ? 
-                        dataset.backgroundColor + '15' : 
+                        dataset.borderColor + '15' : 
                         '#f5f5f5';
                     label.style.color = checkbox.checked ? 
-                        dataset.backgroundColor : 
+                        dataset.borderColor : 
                         '#999';
 
-                    // If it's a percentage stacked bar chart, recalculate percentages
-                    if (${selectedChartType === 'percentStackedBar'}) {
-                        recalculatePercentages(chart);
-                    } else {
-                        chart.update();
-                    }
+                    chart.update();
                 });
             });
 
@@ -1550,12 +1280,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     chart.data.datasets.forEach((dataset, i) => {
                         dataset.data = originalChartData.datasets[i].data;
                     });
-                    
-                    // Set originalData for percentage calculations
-                    if (${selectedChartType === 'percentStackedBar'}) {
-                        chart.originalData = JSON.parse(JSON.stringify(originalChartData));
-                    }
-                    
                 // Use pre-filtered data if available
                 } else if (preFilteredData && preFilteredData[filterValue]) {
                     // Use pre-filtered data from the server
@@ -1572,66 +1296,28 @@ document.addEventListener('DOMContentLoaded', function() {
                                 chart.data.datasets[i].data = dataset.data;
                             }
                         });
-                        
-                        // Store original data for percentage calculations
-                        if (${selectedChartType === 'percentStackedBar'}) {
-                            chart.originalData = JSON.parse(JSON.stringify(filteredData));
-                        }
                     }
                 } else {
                     // Fallback to client-side filtering if no pre-filtered data is available
                     console.log("No pre-filtered data available for " + filterValue + ", using fallback filter");
                     
-                    if ('${chartType}' === 'pie' || '${chartType}' === 'doughnut' || '${chartType}' === 'polarArea') {
-                        // For pie/doughnut/polarArea, filter by label
-                        let matchedIndex = -1;
-                        originalChartData.labels.forEach((label, i) => {
-                            if (String(label) === String(filterValue)) {
-                                matchedIndex = i;
-                            }
-                        });
-                        
-                        if (matchedIndex >= 0) {
-                            chart.data.labels = [originalChartData.labels[matchedIndex]];
-                            chart.data.datasets.forEach((dataset, i) => {
-                                dataset.data = [originalChartData.datasets[i].data[matchedIndex]];
-                            });
+                    // Try exact match in x-axis labels (categorical data)
+                    const matchingIndices = [];
+                    originalChartData.labels.forEach((label, i) => {
+                        if (String(label).toLowerCase() === String(filterValue).toLowerCase()) {
+                            matchingIndices.push(i);
                         }
-                    } else {
-                        // For other chart types, look for the filter value in dataset labels
-                        let foundMatch = false;
+                    });
+                    
+                    if (matchingIndices.length > 0) {
+                        // Filter data to only show matching categories
+                        chart.data.labels = matchingIndices.map(i => originalChartData.labels[i]);
                         chart.data.datasets.forEach((dataset, i) => {
-                            // Check if this dataset label matches the filter
-                            if (dataset.label && dataset.label.toLowerCase().includes(filterValue.toLowerCase())) {
-                                // Show this dataset
-                                chart.getDatasetMeta(i).hidden = false;
-                                foundMatch = true;
-                            } else if (foundMatch) {
-                                // Hide other datasets after we found a matching one
-                                chart.getDatasetMeta(i).hidden = true;
-                            }
+                            dataset.data = matchingIndices.map(i => originalChartData.datasets[i].data[i]);
                         });
-                        
-                        if (!foundMatch) {
-                            // Try exact match in x-axis labels (categorical data)
-                            const matchingIndices = [];
-                            originalChartData.labels.forEach((label, i) => {
-                                if (String(label).toLowerCase() === String(filterValue).toLowerCase()) {
-                                    matchingIndices.push(i);
-                                }
-                            });
-                            
-                            if (matchingIndices.length > 0) {
-                                // Filter data to only show matching categories
-                                chart.data.labels = matchingIndices.map(i => originalChartData.labels[i]);
-                                chart.data.datasets.forEach((dataset, i) => {
-                                    dataset.data = matchingIndices.map(i => originalChartData.datasets[i].data[i]);
-                                });
-                            } else {
-                                // No exact matches found, show message
-                                displayFilterMessage(filterValue);
-                            }
-                        }
+                    } else {
+                        // No exact matches found, show message
+                        displayFilterMessage(filterValue);
                     }
                 }
                 
@@ -1642,14 +1328,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 
-                // First update the chart with the new data
+                // Update the chart
                 chart.update();
-                
-                // For percentage stacked bar charts, make sure to recalculate percentages
-                if (${selectedChartType === 'percentStackedBar'}) {
-                    // Call with a small delay to ensure chart has updated
-                    setTimeout(() => recalculatePercentages(chart), 50);
-                }
             } catch (error) {
                 console.error("Error filtering chart:", error);
                 // Show error message and reset to full data
@@ -1698,77 +1378,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         ` : ''}
 
-        // Add the recalculatePercentages function if it's a percentage stacked bar chart
-        ${selectedChartType === 'percentStackedBar' ? `
-        function recalculatePercentages(chart) {
-            if (!chart || !chart.data || !chart.data.datasets) {
-                return;
-            }
-
-            // Store the current dataset visibility
-            const visibleDatasets = [];
-            chart.data.datasets.forEach((dataset, index) => {
-                const meta = chart.getDatasetMeta(index);
-                if (!meta || !meta.hidden) {
-                    visibleDatasets.push(index);
-                }
-            });
-
-            // We need to work with the original data (non-percentage) to recalculate
-            const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
-            
-            if (!originalData || !originalData.datasets) {
-                console.error("Missing original data for percentage calculation");
-                return;
-            }
-
-            // Calculate totals for each data point using only visible datasets
-            const totals = Array(chart.data.labels.length).fill(0);
-            visibleDatasets.forEach(datasetIndex => {
-                if (datasetIndex < originalData.datasets.length) {
-                    const dataArray = originalData.datasets[datasetIndex].data;
-                    dataArray.forEach((value, index) => {
-                        if (index < totals.length) {
-                            totals[index] += Math.abs(parseFloat(value) || 0);
-                        }
-                    });
-                }
-            });
-
-            // Update percentages for all datasets
-            chart.data.datasets.forEach((dataset, datasetIndex) => {
-                const meta = chart.getDatasetMeta(datasetIndex);
-                
-                if (meta) {
-                    if (!meta.hidden && datasetIndex < originalData.datasets.length) {
-                        const dataArray = originalData.datasets[datasetIndex].data;
-                        dataset.data = dataArray.map((value, index) => {
-                            if (index < totals.length && totals[index] > 0) {
-                                return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
-                            }
-                            return 0;
-                        });
-                    } else {
-                        // Hidden datasets get zeros
-                        dataset.data = Array(chart.data.labels.length).fill(0);
-                    }
-                }
-            });
-
-            chart.update({
-                duration: 300,
-                easing: 'easeOutQuad'
-            });
-        }
-        
-        // Make sure to call recalculatePercentages after initial chart setup
-        setTimeout(() => {
-            if ('${chartType}' === 'bar' && chart.options.scales && 
-                chart.options.scales.y && chart.options.scales.y.stacked) {
-                recalculatePercentages(chart);
-            }
-        }, 200);` : ''}
-
         // Add download functionality
         document.getElementById('downloadChartBtn').addEventListener('click', function() {
             const canvas = document.getElementById('myChart');
@@ -1784,16 +1393,16 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>`;
-            
-            // Create download link
-            const blob = new Blob([html], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.download = chartTitle.replace(/\s+/g, '_') + '.html';
-            link.href = URL.createObjectURL(blob);
-            link.click();
+                
+                // Create download link
+                const blob = new Blob([html], { type: 'text/html' });
+                const link = document.createElement('a');
+                link.download = chartTitle.replace(/\s+/g, '_') + '.html';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            }
         }
-    }
-});
+    });
     
     // Copy chart data to clipboard
     copyDataBtn.addEventListener('click', function() {
@@ -1834,14 +1443,6 @@ document.addEventListener('DOMContentLoaded', function() {
     applyYAxisRangeBtn.addEventListener('click', function() {
         if (!currentChart) return;
         
-        const chartType = getChartJsType(selectedChartType);
-        
-        // Skip for chart types that don't have a standard y-axis
-        if (['pie', 'doughnut', 'polarArea'].includes(chartType)) {
-            alert('Y-axis range is not applicable for this chart type');
-            return;
-        }
-        
         // Get min and max values
         const minValue = yMinValueInput.value.trim() === '' ? undefined : parseFloat(yMinValueInput.value);
         const maxValue = yMaxValueInput.value.trim() === '' ? undefined : parseFloat(yMaxValueInput.value);
@@ -1859,12 +1460,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (minValue !== undefined && maxValue !== undefined && minValue >= maxValue) {
             alert('Min value must be less than max value');
-            return;
-        }
-        
-        // Special handling for percentage stacked bar chart
-        if (selectedChartType === 'percentStackedBar') {
-            alert('Y-axis range is fixed from 0% to 100% for percentage stacked bar charts');
             return;
         }
         
@@ -1894,58 +1489,58 @@ document.addEventListener('DOMContentLoaded', function() {
         
         currentChart.update();
     });
-
-// Share chart
-shareChartBtn.addEventListener('click', function() {
-    if (!currentChart) return;
     
-    // Create a temporary hidden textarea
-    const textarea = document.createElement('textarea');
-    textarea.style.position = 'fixed';
-    textarea.style.left = '-999999px';
-    
-    // Create share text with chart info
-        let shareText = 'Chart: ' + (chartTitleInput.value || 'Untitled Chart') + '\n\n';
-    
-    if (chartDescription.value) {
+    // Share chart
+    shareChartBtn.addEventListener('click', function() {
+        if (!currentChart) return;
+        
+        // Create a temporary hidden textarea
+        const textarea = document.createElement('textarea');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-999999px';
+        
+        // Create share text with chart info
+        let shareText = 'Chart: ' + (chartTitleInput.value || 'Untitled Line Chart') + '\n\n';
+        
+        if (chartDescription.value) {
             shareText += chartDescription.value + '\n\n';
-    }
-    
-    if (chartAdditionalInfo.value) {
+        }
+        
+        if (chartAdditionalInfo.value) {
             shareText += chartAdditionalInfo.value + '\n\n';
-    }
+        }
+        
+        shareText += 'Generated with ChartFlask Analytics Tool';
+        
+        // Copy to clipboard
+        textarea.value = shareText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand('copy');
+            alert('Chart information copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy chart information');
+        }
+        
+        document.body.removeChild(textarea);
+    });
     
-    shareText += 'Generated with ChartFlask Analytics Tool';
-    
-    // Copy to clipboard
-    textarea.value = shareText;
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        document.execCommand('copy');
-        alert('Chart information copied to clipboard!');
-    } catch (err) {
-        console.error('Failed to copy: ', err);
-        alert('Failed to copy chart information');
-    }
-    
-    document.body.removeChild(textarea);
-});
-
-// Download chart with additional info
-downloadChartWithInfoBtn.addEventListener('click', function() {
-    if (!currentChart) return;
-    
-    // First, render the current chart to an image
-    const chartImage = chartCanvas.toDataURL('image/png');
-    
-    // Create HTML content with chart info
-    const description = chartDescription.value || '';
-    const additionalInfo = chartAdditionalInfo.value || '';
-    const chartTitle = chartTitleInput.value || 'Untitled Chart';
-    
-    const html = `<!DOCTYPE html>
+    // Download chart with additional info
+    downloadChartWithInfoBtn.addEventListener('click', function() {
+        if (!currentChart) return;
+        
+        // First, render the current chart to an image
+        const chartImage = chartCanvas.toDataURL('image/png');
+        
+        // Create HTML content with chart info
+        const description = chartDescription.value || '';
+        const additionalInfo = chartAdditionalInfo.value || '';
+        const chartTitle = chartTitleInput.value || 'Untitled Line Chart';
+        
+        const html = `<!DOCTYPE html>
 <html>
 <head>
     <title>${chartTitle}</title>
@@ -2009,7 +1604,6 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
             margin-right: 8px;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 </head>
 <body>
@@ -2032,12 +1626,12 @@ downloadChartWithInfoBtn.addEventListener('click', function() {
     </div>
 </body>
 </html>`;
-    
-    // Create download link
-    const blob = new Blob([html], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.download = chartTitle.replace(/\s+/g, '_') + '_with_info.html';
-    link.href = URL.createObjectURL(blob);
-    link.click();
-});
+        
+        // Create download link
+        const blob = new Blob([html], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.download = chartTitle.replace(/\s+/g, '_') + '_with_info.html';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    });
 });

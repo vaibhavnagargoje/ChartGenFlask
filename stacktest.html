@@ -3,10 +3,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Untitled Chart</title>
+    <title>Untitled Line Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Add Chart.js plugin for data labels if needed -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -140,7 +138,7 @@
 <body>
     <div class="chart-container">
         <div class="chart-header">
-            <div class="chart-title">Untitled Chart</div>
+            <div class="chart-title">Untitled Line Chart</div>
             <img class="chart-logo" src="logo.png" alt="ChartFlask Logo">
         </div>
         
@@ -214,7 +212,7 @@
       "borderColor": "#4e73df",
       "borderWidth": 1,
       "data": [
-        0,
+        null,
         366596,
         366596,
         403048,
@@ -228,7 +226,34 @@
       "fill": false,
       "label": "Deposits",
       "spanGaps": false,
-      "tension": 0
+      "tension": 0,
+      "pointRadius": 2,
+      "pointBackgroundColor": "#4e73df",
+      "pointHoverRadius": 6
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        0,
+        153301,
+        153301,
+        172567,
+        298831,
+        328116,
+        0,
+        92601,
+        105973,
+        492363
+      ],
+      "fill": false,
+      "label": "Total Loan",
+      "spanGaps": false,
+      "tension": 0,
+      "pointRadius": 2,
+      "pointBackgroundColor": "#ee8939",
+      "pointHoverRadius": 5
     }
   ],
   "labels": [
@@ -254,19 +279,40 @@
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          0,
+          null,
           45152,
           45152,
           49852,
           83250,
           92053,
-          'null',
+          null,
           132546,
           129136,
           84666
         ],
         "fill": false,
         "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 2,
+        "data": [
+          0,
+          18870,
+          18870,
+          21470,
+          20394,
+          22320,
+          0,
+          13560,
+          15508,
+          39570
+        ],
+        "fill": false,
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -291,13 +337,13 @@
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          0,
+          null,
           82216,
           82216,
           87206,
           142098,
           162863,
-          0,
+          null,
           81312,
           178332,
           275774
@@ -306,41 +352,25 @@
         "label": "Deposits",
         "spanGaps": false,
         "tension": 0
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Vaibhavwadi": {
-    "datasets": [
+      },
       {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
         "borderWidth": 1,
         "data": [
           0,
-          13275,
-          13275,
-          16875,
-          22889,
-          28324,
-          null,
-          45183,
-          46120,
-          25790
+          34323,
+          34323,
+          35712,
+          35612,
+          39270,
+          0,
+          14164,
+          21416,
+          184575
         ],
         "fill": false,
-        "label": "Deposits",
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -365,16 +395,34 @@
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          0,
+          null,
           45243,
           45243,
           50913,
           58916,
           63729,
-          0
+          null
         ],
         "fill": false,
         "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          19231,
+          19231,
+          21831,
+          100065,
+          107412,
+          0
+        ],
+        "fill": false,
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -389,57 +437,47 @@
       2018
     ]
   },
-  "Kankavali": {
+  "Vaibhavwadi": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          0,
-          61123,
-          61123,
-          68123,
-          91243,
-          106215,
-          0
+          null,
+          13275,
+          13275,
+          16875,
+          22889,
+          28324,
+          null,
+          45183,
+          46120,
+          25790
         ],
         "fill": false,
         "label": "Deposits",
         "spanGaps": false,
         "tension": 0
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018
-    ]
-  },
-  "Vengurla": {
-    "datasets": [
+      },
       {
-        "backgroundColor": "#4e73df",
-        "borderColor": "#4e73df",
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
         "borderWidth": 1,
         "data": [
           0,
-          40263,
-          40263,
-          43633,
-          69743,
-          70810,
+          5459,
+          5459,
+          7959,
+          8207,
+          9209,
           0,
-          174117,
-          83016,
-          86637
+          4302,
+          5538,
+          10152
         ],
         "fill": false,
-        "label": "Deposits",
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -457,6 +495,113 @@
       2021
     ]
   },
+  "Vengurla": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          null,
+          40263,
+          40263,
+          43633,
+          69743,
+          70810,
+          null,
+          174117,
+          83016,
+          86637
+        ],
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          16437,
+          16437,
+          19107,
+          82557,
+          89989,
+          0,
+          16251,
+          9970,
+          33168
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Kankavali": {
+    "datasets": [
+      {
+        "backgroundColor": "#4e73df",
+        "borderColor": "#4e73df",
+        "borderWidth": 1,
+        "data": [
+          null,
+          61123,
+          61123,
+          68123,
+          91243,
+          106215,
+          null
+        ],
+        "fill": false,
+        "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          25467,
+          25467,
+          28467,
+          23035,
+          27973,
+          0
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
+    ]
+  },
   "Sawantwadi": {
     "datasets": [
       {
@@ -464,16 +609,34 @@
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          0,
+          null,
           61078,
           61078,
           65218,
           114219,
           134540,
-          0
+          null
         ],
         "fill": false,
         "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          25643,
+          25643,
+          28343,
+          19577,
+          21473,
+          0
+        ],
+        "fill": false,
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -495,19 +658,40 @@
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          0,
+          null,
           18246,
           18246,
           21228,
           42229,
           49567,
-          0,
+          null,
           36959,
           36896,
           40121
         ],
         "fill": false,
         "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          7871,
+          7871,
+          9678,
+          9384,
+          10470,
+          0,
+          3526,
+          4431,
+          11766
+        ],
+        "fill": false,
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -525,19 +709,33 @@
       2021
     ]
   },
-  "Kankawali": {
+  "Malwan": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          144517,
-          147584,
-          160439
+          117441,
+          119912,
+          100268
         ],
         "fill": false,
         "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          11896,
+          14400,
+          43158
+        ],
+        "fill": false,
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -563,6 +761,20 @@
         "label": "Deposits",
         "spanGaps": false,
         "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          14850,
+          16986,
+          84239
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "spanGaps": false,
+        "tension": 0
       }
     ],
     "labels": [
@@ -571,19 +783,33 @@
       2021
     ]
   },
-  "Malwan": {
+  "Kankawali": {
     "datasets": [
       {
         "backgroundColor": "#4e73df",
         "borderColor": "#4e73df",
         "borderWidth": 1,
         "data": [
-          117441,
-          119912,
-          100268
+          144517,
+          147584,
+          160439
         ],
         "fill": false,
         "label": "Deposits",
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          14052,
+          17724,
+          85735
+        ],
+        "fill": false,
+        "label": "Total Loan",
         "spanGaps": false,
         "tension": 0
       }
@@ -605,13 +831,13 @@
       "borderColor": "#4e73df",
       "borderWidth": 1,
       "data": [
-        0,
+        null,
         366596,
         366596,
         403048,
         624587,
         708101,
-        0,
+        null,
         870585,
         882431,
         985227
@@ -619,7 +845,34 @@
       "fill": false,
       "label": "Deposits",
       "spanGaps": false,
-      "tension": 0
+      "tension": 0,
+      "pointRadius": 2,
+      "pointBackgroundColor": "#4e73df",
+      "pointHoverRadius": 6
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        0,
+        153301,
+        153301,
+        172567,
+        298831,
+        328116,
+        0,
+        92601,
+        105973,
+        492363
+      ],
+      "fill": false,
+      "label": "Total Loan",
+      "spanGaps": false,
+      "tension": 0,
+      "pointRadius": 2,
+      "pointBackgroundColor": "#ee8939",
+      "pointHoverRadius": 6
     }
   ],
   "labels": [
@@ -642,28 +895,7 @@
     "duration": 750,
     "easing": "easeInOutQuart"
   },
-  "plugins": {
-    "title": {
-      "display": false,
-      "text": ""
-    },
-    "legend": {
-      "display": false
-    },
-    "tooltip": {
-      "backgroundColor": "yellow",
-      "titleColor": "black",
-      "bodyColor": "black",
-      "callbacks": {}
-    },
-    "datalabels": {
-      "display": false,
-      "color": "white",
-      "font": {
-        "weight": "normal"
-      }
-    }
-  },
+  "plugins": {},
   "scales": {
     "x": {
       "axis": "x",
@@ -784,9 +1016,6 @@
   },
   "spanGaps": false
 };
-        
-        // Register plugins if needed
-        
 
         // Create chart with exact same configuration but remove redundant title
         const chart = new Chart(ctx, {
@@ -800,23 +1029,10 @@
                     title: {
                         display: false
                     },
-                    datalabels: {
-                        display: false,
-                        color: 'white',
-                        font: {
-                            weight: 'normal'
-                        },
-                        formatter: function(value) {
-                            if (false) {
-                                return parseFloat(value).toFixed(1) + '%';
-                            }
-                            return null;
-                        }
-                    },
                     tooltip: {
-                        backgroundColor: 'yellow', // Change tooltip background to yellow
-                        titleColor: 'black', // Change title text color (optional)
-                        bodyColor: 'black', // Change body text color (optional)
+                        backgroundColor: 'yellow', // Yellow tooltip background
+                        titleColor: 'black',
+                        bodyColor: 'black',
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -824,9 +1040,7 @@
                                     label += ': ';
                                 }
                                 
-                                if (false) {
-                                    label += parseFloat(context.parsed.y).toFixed(1) + '%';
-                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
+                                if (context.parsed.y !== null && context.parsed.y !== undefined) {
                                     label += formatIndianNumber(context.parsed.y);
                                 } else {
                                     label += 'No data'; // For null values, show 'No data' in tooltip
@@ -845,9 +1059,6 @@
                         ...chartOptions.scales?.y,
                         ticks: {
                             callback: function(value) {
-                                if (false) {
-                                    return value + '%';
-                                }
                                 return formatIndianNumber(value);
                             }
                         }
@@ -856,9 +1067,6 @@
                 spanGaps: false // Don't connect points across null values for line charts
             }
         });
-
-        // If it's a percentage stacked bar chart, store original data for calculations
-        
 
         // Create custom legend container
         const legendContainer = document.createElement('div');
@@ -869,8 +1077,8 @@
         chartData.datasets.forEach((dataset, index) => {
             const legendItem = document.createElement('div');
             legendItem.className = 'legend-item';
-            legendItem.style.backgroundColor = dataset.backgroundColor + '15';
-            legendItem.style.border = '1px solid ' + dataset.backgroundColor + '40';
+            legendItem.style.backgroundColor = dataset.borderColor + '15';
+            legendItem.style.border = '1px solid ' + dataset.borderColor + '40';
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -878,7 +1086,7 @@
 
             const label = document.createElement('span');
             label.textContent = dataset.label;
-            label.style.color = dataset.backgroundColor;
+            label.style.color = dataset.borderColor;
 
             legendItem.appendChild(checkbox);
             legendItem.appendChild(label);
@@ -894,18 +1102,13 @@
 
                     // Update legend item appearance
                     legendItem.style.backgroundColor = checkbox.checked ? 
-                        dataset.backgroundColor + '15' : 
+                        dataset.borderColor + '15' : 
                         '#f5f5f5';
                     label.style.color = checkbox.checked ? 
-                        dataset.backgroundColor : 
+                        dataset.borderColor : 
                         '#999';
 
-                    // If it's a percentage stacked bar chart, recalculate percentages
-                    if (false) {
-                        recalculatePercentages(chart);
-                    } else {
-                        chart.update();
-                    }
+                    chart.update();
                 });
             });
 
@@ -933,12 +1136,6 @@
                     chart.data.datasets.forEach((dataset, i) => {
                         dataset.data = originalChartData.datasets[i].data;
                     });
-                    
-                    // Set originalData for percentage calculations
-                    if (false) {
-                        chart.originalData = JSON.parse(JSON.stringify(originalChartData));
-                    }
-                    
                 // Use pre-filtered data if available
                 } else if (preFilteredData && preFilteredData[filterValue]) {
                     // Use pre-filtered data from the server
@@ -955,66 +1152,28 @@
                                 chart.data.datasets[i].data = dataset.data;
                             }
                         });
-                        
-                        // Store original data for percentage calculations
-                        if (false) {
-                            chart.originalData = JSON.parse(JSON.stringify(filteredData));
-                        }
                     }
                 } else {
                     // Fallback to client-side filtering if no pre-filtered data is available
                     console.log("No pre-filtered data available for " + filterValue + ", using fallback filter");
                     
-                    if ('line' === 'pie' || 'line' === 'doughnut' || 'line' === 'polarArea') {
-                        // For pie/doughnut/polarArea, filter by label
-                        let matchedIndex = -1;
-                        originalChartData.labels.forEach((label, i) => {
-                            if (String(label) === String(filterValue)) {
-                                matchedIndex = i;
-                            }
-                        });
-                        
-                        if (matchedIndex >= 0) {
-                            chart.data.labels = [originalChartData.labels[matchedIndex]];
-                            chart.data.datasets.forEach((dataset, i) => {
-                                dataset.data = [originalChartData.datasets[i].data[matchedIndex]];
-                            });
+                    // Try exact match in x-axis labels (categorical data)
+                    const matchingIndices = [];
+                    originalChartData.labels.forEach((label, i) => {
+                        if (String(label).toLowerCase() === String(filterValue).toLowerCase()) {
+                            matchingIndices.push(i);
                         }
-                    } else {
-                        // For other chart types, look for the filter value in dataset labels
-                        let foundMatch = false;
+                    });
+                    
+                    if (matchingIndices.length > 0) {
+                        // Filter data to only show matching categories
+                        chart.data.labels = matchingIndices.map(i => originalChartData.labels[i]);
                         chart.data.datasets.forEach((dataset, i) => {
-                            // Check if this dataset label matches the filter
-                            if (dataset.label && dataset.label.toLowerCase().includes(filterValue.toLowerCase())) {
-                                // Show this dataset
-                                chart.getDatasetMeta(i).hidden = false;
-                                foundMatch = true;
-                            } else if (foundMatch) {
-                                // Hide other datasets after we found a matching one
-                                chart.getDatasetMeta(i).hidden = true;
-                            }
+                            dataset.data = matchingIndices.map(i => originalChartData.datasets[i].data[i]);
                         });
-                        
-                        if (!foundMatch) {
-                            // Try exact match in x-axis labels (categorical data)
-                            const matchingIndices = [];
-                            originalChartData.labels.forEach((label, i) => {
-                                if (String(label).toLowerCase() === String(filterValue).toLowerCase()) {
-                                    matchingIndices.push(i);
-                                }
-                            });
-                            
-                            if (matchingIndices.length > 0) {
-                                // Filter data to only show matching categories
-                                chart.data.labels = matchingIndices.map(i => originalChartData.labels[i]);
-                                chart.data.datasets.forEach((dataset, i) => {
-                                    dataset.data = matchingIndices.map(i => originalChartData.datasets[i].data[i]);
-                                });
-                            } else {
-                                // No exact matches found, show message
-                                displayFilterMessage(filterValue);
-                            }
-                        }
+                    } else {
+                        // No exact matches found, show message
+                        displayFilterMessage(filterValue);
                     }
                 }
                 
@@ -1025,14 +1184,8 @@
                     }
                 });
                 
-                // First update the chart with the new data
+                // Update the chart
                 chart.update();
-                
-                // For percentage stacked bar charts, make sure to recalculate percentages
-                if (false) {
-                    // Call with a small delay to ensure chart has updated
-                    setTimeout(() => recalculatePercentages(chart), 50);
-                }
             } catch (error) {
                 console.error("Error filtering chart:", error);
                 // Show error message and reset to full data
@@ -1081,15 +1234,12 @@
         }
         
 
-        // Add the recalculatePercentages function if it's a percentage stacked bar chart
-        
-
         // Add download functionality
         document.getElementById('downloadChartBtn').addEventListener('click', function() {
             const canvas = document.getElementById('myChart');
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Untitled Chart.png';
+            link.download = 'Untitled Line Chart.png';
             link.href = image;
             link.click();
         });
