@@ -543,7 +543,6 @@ document.addEventListener('DOMContentLoaded', function() {
             dataset.pointRadius = 2;
             dataset.pointBackgroundColor = dataset.borderColor;
             dataset.pointHoverRadius = 4;
-            dataset.pointBorderWidth = 5;
             dataset.spanGaps = false; // Don't connect points across null values
             
             // Log the dataset to check for nulls

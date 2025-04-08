@@ -14,17 +14,40 @@ app.config['ALLOWED_EXTENSIONS'] = {'xlsx', 'xls'}
 # Create uploads folder if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Custom JSON encoder to handle NumPy data types
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            # Handle NaN
+            return None if np.isnan(obj) else float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if pd.isna(obj):
+            return None
+        return super().default(obj)
+
+# Configure Flask to use the custom JSON encoder
+app.json_encoder = CustomJSONEncoder
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# Function to replace NaN with None in nested structures (dict, list)
-def replace_nan_with_none(obj):
+# Function to replace NaN and NumPy types with native Python types in nested structures
+def convert_to_serializable(obj):
     if isinstance(obj, dict):
-        return {k: replace_nan_with_none(v) for k, v in obj.items()}
+        return {k: convert_to_serializable(v) for k, v in obj.items()}
     elif isinstance(obj, list):
-        return [replace_nan_with_none(item) for item in obj]
-    elif isinstance(obj, (float, np.float64, np.float32)) and np.isnan(obj):
-        return None
+        return [convert_to_serializable(item) for item in obj]
+    elif isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+        return None if np.isnan(obj) else float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, (pd.Timestamp, pd._libs.tslibs.timestamps.Timestamp)):
+        return obj.isoformat()
     elif pd and pd.isna(obj):  # Check if it's a pandas NA value
         return None
     else:
@@ -77,21 +100,20 @@ def get_sheet_data():
         return jsonify({'success': False, 'error': 'File not found'})
     
     try:
-        # Read the sheet data with pandas - keep NaN values
+        # Read the sheet data with pandas
         df = pd.read_excel(filepath, sheet_name=sheet_name, keep_default_na=True)
-        
-        # Convert NaN to None explicitly
-        df = df.replace({np.nan: None})
         
         # Get column names
         columns = df.columns.tolist()
         
         # Convert data to a list of dictionaries for easier processing in JavaScript
-        # NaN values are already converted to None
         data = df.to_dict('records')
         
-        # Double-check to ensure all NaN values are converted to None
-        data = replace_nan_with_none(data)
+        # Convert all data to be JSON serializable
+        data = convert_to_serializable(data)
+        
+        # Print for debugging
+        print(f"First row of data (after serialization): {data[0] if data else 'No data'}")
         
         return jsonify({
             'success': True,
@@ -100,6 +122,8 @@ def get_sheet_data():
             'rowCount': len(data)
         })
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/generate_chart', methods=['POST'])
@@ -127,7 +151,7 @@ def generate_chart():
         return jsonify({'success': False, 'error': 'File not found'})
     
     try:
-        # Read the data with keep_default_na=True to properly handle empty cells
+        # Read the data
         df = pd.read_excel(filepath, sheet_name=sheet_name, keep_default_na=True)
         
         # Apply row range filter
@@ -146,22 +170,37 @@ def generate_chart():
         if filter_column and filter_value:
             df = df[df[filter_column] == filter_value]
         
-        # Process data for chart (empty/zero preserved)
+        # Process data for chart
         chart_data = process_chart_data(df, x_axis, y_axes, chart_type)
         
-        # Ensure all NaN values are converted to None
-        chart_data = replace_nan_with_none(chart_data)
+        # Convert all data to be JSON serializable
+        chart_data = convert_to_serializable(chart_data)
         
         # Prepare chart filter values
         chart_filter_values = []
         if chart_filter_column:
             chart_filter_values = df[chart_filter_column].dropna().unique().tolist()
-            # Also handle NaN in filter values
-            chart_filter_values = replace_nan_with_none(chart_filter_values)
+            # Convert to serializable
+            chart_filter_values = convert_to_serializable(chart_filter_values)
         
-        # Verify the chart data structure before sending
-        print("Chart data before sending:")
-        print(json.dumps(chart_data, default=str))
+        # Test JSON serialization to catch any issues
+        try:
+            test_json = json.dumps({
+                'chartData': chart_data,
+                'chartType': chart_type,
+                'chartFilterValues': chart_filter_values
+            }, cls=CustomJSONEncoder)
+            print(f"JSON serialization test successful, size: {len(test_json)}")
+        except Exception as e:
+            print(f"JSON serialization test failed: {str(e)}")
+            # If serialization fails, we'll try to find and fix the issue
+            import traceback
+            traceback.print_exc()
+            # Last resort fix: manually convert everything to strings
+            if 'is not JSON serializable' in str(e):
+                print("Attempting last resort fix...")
+                chart_data = force_json_serializable(chart_data)
+                chart_filter_values = force_json_serializable(chart_filter_values)
         
         return jsonify({
             'success': True,
@@ -173,6 +212,23 @@ def generate_chart():
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})
+
+# Last resort function to force JSON serialization by converting all values to strings
+def force_json_serializable(obj):
+    if isinstance(obj, dict):
+        return {k: force_json_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [force_json_serializable(item) for item in obj]
+    elif obj is None:
+        return None
+    elif isinstance(obj, (int, float, str, bool)):
+        return obj
+    else:
+        # Convert any other type to string
+        try:
+            return str(obj)
+        except:
+            return "Non-serializable value"
 
 # Helper function to generate colors for pie/doughnut charts
 def generate_colors(count):
@@ -255,7 +311,7 @@ def apply_chart_filter():
         return jsonify({'success': False, 'error': 'File not found'})
     
     try:
-        # Read the sheet data with pandas - add keep_default_na=True
+        # Read the sheet data with pandas
         df = pd.read_excel(filepath, sheet_name=sheet_name, keep_default_na=True)
         
         # Apply row range filter
@@ -281,8 +337,8 @@ def apply_chart_filter():
         # Process data for chart
         chart_data = process_chart_data(df, x_axis, y_axes, chart_type)
         
-        # Ensure all NaN values are converted to None
-        chart_data = replace_nan_with_none(chart_data)
+        # Convert all data to be JSON serializable
+        chart_data = convert_to_serializable(chart_data)
         
         # Add information about visible datasets
         visible_indices = data.get('visibleDatasets')
@@ -310,6 +366,8 @@ def apply_chart_filter():
         })
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})
 
 # Helper function to process chart data
@@ -343,7 +401,14 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
                     y_data.append(None)  # Use None for missing data
                 else:
                     # We have some data, sum it (ignoring NaNs)
-                    y_data.append(matching_rows[y_axis].sum(skipna=True))
+                    value = matching_rows[y_axis].sum(skipna=True)
+                    # Convert NumPy types to Python native types
+                    if isinstance(value, (np.integer, np.floating)):
+                        value = float(value) if isinstance(value, np.floating) else int(value)
+                        # Check for NaN
+                        if np.isnan(value):
+                            value = None
+                    y_data.append(value)
             
             # Create dataset with explicit None values for missing data
             dataset = {
@@ -359,9 +424,15 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
             
             chart_data['datasets'].append(dataset)
         
+        # Make sure all values are JSON serializable 
+        chart_data = convert_to_serializable(chart_data)
+        
         # Print for debugging
-        print("Chart data structure:")
-        print(chart_data)
+        print("Chart data structure (first few values):")
+        if chart_data and 'datasets' in chart_data and len(chart_data['datasets']) > 0:
+            first_dataset = chart_data['datasets'][0]
+            print(f"Dataset label: {first_dataset.get('label')}")
+            print(f"First 5 data points: {first_dataset.get('data', [])[0:5]}")
         
         return chart_data
 
