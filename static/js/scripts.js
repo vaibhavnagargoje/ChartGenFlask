@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
         
         // Set appropriate height for the chart container
-        chartCanvas.parentElement.style.height = '520px';
+        chartCanvas.parentElement.style.height = '600px';
         
         // Apply color palette to datasets if not already set
         for (let i = 0; i < chartData.datasets.length; i++) {
