@@ -1152,6 +1152,10 @@ document.addEventListener('DOMContentLoaded', function() {
             data: chartData,
             options: {
                 ...chartOptions,
+                interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                 plugins: {
                     ...chartOptions.plugins,
                     // Remove title from chart as it's now in the header
