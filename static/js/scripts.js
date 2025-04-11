@@ -540,9 +540,9 @@ document.addEventListener('DOMContentLoaded', function() {
             dataset.fill = false;
             dataset.tension = 0; // Smooth line
             dataset.borderWidth = 1;
-            dataset.pointRadius = 2;
+            dataset.pointRadius = 0;
             dataset.pointBackgroundColor = dataset.borderColor;
-            dataset.pointHoverRadius = 4;
+            dataset.pointHoverRadius = 3;
             dataset.spanGaps = false; // Don't connect points across null values
             
             // Log the dataset to check for nulls
@@ -574,10 +574,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 scales: {
                     x: {
                         grid: {
-                            display: false
+                            display: false,
+                            drawBorder: true
                         }
                     },
                     y: {
+                        grid: {
+                            drawBorder: false,
+                        },
                         ticks: {
                             callback: function(value) {
                                 return formatIndianNumber(value);
@@ -970,7 +974,7 @@ document.addEventListener('DOMContentLoaded', function() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .chart-title {
             font-size: 20px;
@@ -978,17 +982,18 @@ document.addEventListener('DOMContentLoaded', function() {
             color: #2c3e50;
             flex-grow: 1;
             text-align: center;
+             margin-left: 90px;
         }
         .chart-logo {
-            width: 68px;
-            height: 24px;
-            margin-left: 15px;
+            width: 90px;
+            height: auto;
+            
         }
         .chart-filter-controls {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            background-color: #f8f9fa;
+           
             padding: 8px;
             border-radius: 4px;
         }
@@ -997,16 +1002,16 @@ document.addEventListener('DOMContentLoaded', function() {
             align-items: center;
         }
         .chart-filter-group label {
-            margin-right: 10px;
-            font-size: 14px;
-            color: #444;
+            margin-right: 5px;
+            font-size: 12px;
+            color: black;
         }
         .chart-filter-group select {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            min-width: 200px;
+            padding: 6px 5px;
+            color:rgb(0, 0, 0);
+            border: 1px solid #863F3F;
+            font-size: 12px;
+            min-width: 100px;
         }
         .chart-canvas-container {
             height: 500px;
@@ -1015,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .chart-footer {
             display: flex;
             justify-content: space-between;
-            margin-top: 60px;
+            margin-top: 10px;
             padding-top: 5px;
             border-top: 1px solid #e9ecef;
         }
@@ -1032,7 +1037,6 @@ document.addEventListener('DOMContentLoaded', function() {
             margin-top: 2px;
             padding: 2px;
             font-size: 10px;
-            color:rgb(22, 22, 22);
             padding-left: 70px;
         }
         .chart-actions {
@@ -1051,33 +1055,15 @@ document.addEventListener('DOMContentLoaded', function() {
             color: #6c757d;
             padding: 0;
             margin: 0;
+            margin-top: 7px;
         }
         .icon-btn:hover {
-            color: #4e73df;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .custom-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .legend-item input {
-            cursor: pointer;
-            margin-right: 6px;
-        }
-        .legend-item span {
-            cursor: pointer;
-            font-weight: 500;
-        }
+      
+       
+       
     </style>
 </head>
 <body>
@@ -1089,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ${chartFilterColumn ? `
         <div class="chart-filter-controls">
             <div class="chart-filter-group">
-                <label for="chartFilter">Filter by ${chartFilterColumn}:</label>
+                <label for="chartFilter">${chartFilterColumn}</label>
                 <select id="chartFilter" onchange="filterChartData()">
                     <option value="">All Values</option>
                     ${chartFilterOptions.map(value => value ? `<option value="${value}" ${value === selectedFilterValue ? 'selected' : ''}>${value}</option>` : '').join('')}
@@ -1103,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="chart-footer">
             <div class="chart-info">
                 ${description ? `<span class="chart-description">Source: ${description}</span>` : ''}
-                ${additionalInfo ? `<div class="chart-additional-info">Comment: ${additionalInfo}</div>` : ''}
+                ${additionalInfo ? `<div class="chart-additional-info">${additionalInfo}</div>` : ''}
             </div>
             <div class="chart-actions">
                 <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
@@ -1193,17 +1179,45 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     },
                     legend: {
-                        display: false
-                    }
+                        display: true,
+                        labels: {
+                                    boxWidth: 20,        // Width of the color box
+                                    boxHeight: 20,       // Height of the color box
+                                    usePointStyle: true, // Makes it more like a round dot or checkbox
+                                    pointStyle: 'rect', // Use 'circle', 'rect', 'rectRounded', 'cross', etc.
+                                    padding: 15,
+                                    color: '#333',       // Label text color
+                                    font: {
+                                    size: 12,
+                                    }
+                        }}
                 },
                 scales: {
                     ...chartOptions.scales,
+                    x: {
+                        ...chartOptions.scales?.x,
+                        offset: true,
+                        grid: {
+                            drawTicks: true,
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            color: '#333'       // Optional: customize tick color
+                            }
+                    },
                     y: {
                         ...chartOptions.scales?.y,
+                         offset: true,
+                
+                        grid: {
+                            
+                            drawBorder: false     // ✅ Show tick marks
+                        },
                         ticks: {
                             callback: function(value) {
                                 return formatIndianNumber(value);
-                            }
+                            },
+                            color: '#333'       // Optional: customize tick color
                         }
                     }
                 },
@@ -1211,53 +1225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Create custom legend container
-        const legendContainer = document.createElement('div');
-        legendContainer.className = 'custom-legend';
-        document.querySelector('.chart-canvas-container').insertBefore(legendContainer, myChart);
-
-        // Create legend items with checkboxes
-        chartData.datasets.forEach((dataset, index) => {
-            const legendItem = document.createElement('div');
-            legendItem.className = 'legend-item';
-            legendItem.style.backgroundColor = dataset.borderColor + '15';
-            legendItem.style.border = '1px solid ' + dataset.borderColor + '40';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = true;
-
-            const label = document.createElement('span');
-            label.textContent = dataset.label;
-            label.style.color = dataset.borderColor;
-
-            legendItem.appendChild(checkbox);
-            legendItem.appendChild(label);
-
-            // Add click handlers
-            [checkbox, label, legendItem].forEach(element => {
-                element.addEventListener('click', (e) => {
-                    if (e.target !== checkbox) {
-                        checkbox.checked = !checkbox.checked;
-                    }
-                    const meta = chart.getDatasetMeta(index);
-                    meta.hidden = !checkbox.checked;
-
-                    // Update legend item appearance
-                    legendItem.style.backgroundColor = checkbox.checked ? 
-                        dataset.borderColor + '15' : 
-                        '#f5f5f5';
-                    label.style.color = checkbox.checked ? 
-                        dataset.borderColor : 
-                        '#999';
-
-                    chart.update();
-                });
-            });
-
-            legendContainer.appendChild(legendItem);
-        });
-
+       
         ${chartFilterColumn ? `
         // Function to filter chart data based on selected value
         function filterChartData() {

@@ -1,0 +1,737 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Untitled Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Chart.js plugin for data labels if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: Lato; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .chart-container { 
+            max-width: 1000px; 
+            margin: 0 auto 20px auto; 
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .chart-logo {
+            width: 68px;
+            height: 24px;
+            margin-left: 15px;
+        }
+        .chart-filter-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .chart-filter-group {
+            display: flex;
+            align-items: center;
+        }
+        .chart-filter-group label {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #444;
+        }
+        .chart-filter-group select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .chart-canvas-container {
+            height: 500px;
+            width: 100%;
+        }
+        .chart-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            padding-top: 5px;
+            border-top: 1px solid #e9ecef;
+        }
+        .chart-info {
+            flex: 1;
+        }
+        .chart-description {
+            margin-top: 0;
+            padding: 2px;
+            font-size: 10px;
+            padding-left: 70px;
+        }
+        .chart-additional-info {
+            margin-top: 2px;
+            padding: 2px;
+            font-size: 10px;
+            color:rgb(22, 22, 22);
+            padding-left: 70px;
+        }
+        .chart-actions {
+            display: flex;
+            align-items: flex-start;
+            margin-left: 15px;
+        }
+        .chart-date {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            margin: 0;
+        }
+        .icon-btn:hover {
+            color: #4e73df;
+        }
+        .custom-legend {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            
+        }
+        .legend-item {
+            
+            display: flex;
+           
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .legend-item input {
+            cursor: pointer;
+            margin-right: 6px;
+        }
+        .legend-item span {
+            cursor: pointer;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">Untitled Chart</div>
+            <img class="chart-logo" src="logo.png" alt="ChartFlask Logo">
+        </div>
+        
+        <div class="chart-canvas-container">
+            <canvas id="myChart"></canvas>
+        </div>
+        <div class="chart-footer">
+            <div class="chart-info">
+                
+                
+            </div>
+            <div class="chart-actions">
+                <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Indian number formatting function
+        function formatIndianNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '';  // Return empty string for null values
+            
+            let isNegative = false;
+            if (num < 0) {
+                isNegative = true;
+                num = Math.abs(num);
+            }
+            
+            let formattedNumber;
+            if (num < 1000) {
+                formattedNumber = num.toString();
+            } else {
+                const parts = num.toString().split('.');
+                let integerPart = parts[0];
+                
+                const lastThree = integerPart.substring(integerPart.length - 3);
+                const remaining = integerPart.substring(0, integerPart.length - 3);
+                
+                let formattedRemaining = '';
+                if (remaining) {
+                    formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+                }
+                
+                formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
+                
+                if (parts.length > 1) {
+                    formattedNumber += '.' + parts[1];
+                }
+            }
+            
+            return isNegative ? '-' + formattedNumber : formattedNumber;
+        }
+
+        // Store original chart data for filtering
+        const originalChartData = {
+  "datasets": [
+    {
+      "backgroundColor": "#4e73df",
+      "borderColor": "#4e73df",
+      "borderWidth": 1,
+      "data": [
+        29.92,
+        30.13,
+        30.94,
+        31.95,
+        34.36,
+        36.23,
+        37.6,
+        38.53,
+        27.08
+      ],
+      "label": "Livestock"
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        70.08,
+        69.87,
+        69.06,
+        68.05,
+        65.64,
+        63.77,
+        62.4,
+        61.47,
+        72.92
+      ],
+      "label": "revenue and expenditure"
+    }
+  ],
+  "labels": [
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2011"
+  ]
+};
+        
+        // Pre-filtered data for each district
+        const preFilteredData = {};
+
+        // Chart configuration
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const chartData = {
+  "datasets": [
+    {   
+        "borderWidth": 0.5,
+      "backgroundColor": "#4e73df",
+      "borderColor": "#4e73df",
+      "borderWidth": 1,
+      "data": [
+        29.92,
+        30.13,
+        30.94,
+        31.95,
+        34.36,
+        36.23,
+        37.6,
+        38.53,
+        27.08
+      ],
+      "label": "Livestock"
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        70.08,
+        69.87,
+        69.06,
+        68.05,
+        65.64,
+        63.77,
+        62.4,
+        61.47,
+        72.92
+      ],
+      "label": "revenue and expenditure"
+    }
+  ],
+  "labels": [
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    
+    
+  ]
+};
+        const chartOptions = {
+  "responsive": true,
+  "maintainAspectRatio": false,
+  "animation": {
+    "duration": 750,
+    "easing": "easeInOutQuart"
+  },
+    "borderWidth": 1,
+    "borderRadius": 0,          // Rounded bar corners
+    "barThickness": 150,         // Fixed bar width
+    "maxBarThickness": 200,
+    "hoverBorderColor": '#1e3a8a',
+  "plugins": {
+    "title": {
+      "display": false,
+      "text": ""
+    },
+    "legend": {
+      "display": false
+    },
+    "tooltip": {
+      "backgroundColor": "yellow",
+      "titleColor": "black",
+      "bodyColor": "black",
+      "callbacks": {}
+    },
+    "datalabels": {
+      "display": true,
+      "color": "white",
+      "font": {
+        "weight": "normal"
+      }
+    }
+  },
+  "scales": {
+    "x": {
+      "axis": "x",
+      "stacked": true,
+      "grid": {
+        "display": false,
+        "offset": true,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "type": "category",
+      "offset": true,
+      "ticks": {
+        "minRotation": 0,
+        "maxRotation": 50,
+        "mirror": false,
+        "textStrokeWidth": 0,
+        "textStrokeColor": "",
+        "padding": 3,
+        "display": true,
+        "autoSkip": true,
+        "autoSkipPadding": 3,
+        "labelOffset": 0,
+        "minor": {},
+        "major": {},
+        "align": "center",
+        "crossAlign": "near",
+        "showLabelBackdrop": false,
+        "backdropColor": "rgba(255, 255, 255, 0.75)",
+        "backdropPadding": 2,
+        "color": "#666"
+      },
+      "display": true,
+      "reverse": false,
+      "beginAtZero": false,
+      "bounds": "ticks",
+      "clip": true,
+      "grace": 0,
+      "border": {
+        "display": true,
+        "dash": [],
+        "dashOffset": 0,
+        "width": 1,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "title": {
+        "display": false,
+        "text": "",
+        "padding": {
+          "top": 4,
+          "bottom": 4
+        },
+        "color": "#666"
+      },
+      "id": "x",
+      "position": "bottom"
+    },
+    "y": {
+      "axis": "y",
+      
+      "stacked": true,
+      "grid": {
+        "display": true,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "offset": false,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "min": 0,
+      "max": 100,
+      "ticks": {
+        "minRotation": 0,
+        "maxRotation": 50,
+        "mirror": false,
+        "textStrokeWidth": 0,
+        "textStrokeColor": "",
+        "padding": 3,
+        "display": true,
+        "autoSkip": true,
+        "autoSkipPadding": 3,
+        "labelOffset": 0,
+        "minor": {},
+        "major": {},
+        "align": "center",
+        "crossAlign": "near",
+        "showLabelBackdrop": false,
+        "backdropColor": "rgba(255, 255, 255, 0.75)",
+        "backdropPadding": 2,
+        "color": "#666"
+      },
+      "type": "linear",
+      "beginAtZero": true,
+      "display": true,
+      "offset": false,
+      "reverse": false,
+      "bounds": "ticks",
+      "clip": true,
+      "grace": 0,
+      
+      "grid": {
+        "display":  false,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "offset": false,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "border": {
+        "display": true,
+        "dash": [],
+        "dashOffset": 0,
+        "width": 1,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "title": {
+        "display": false,
+        "text": "",
+        "padding": {
+          "top": 4,
+          "bottom": 4
+        },
+        "color": "#666"
+      },
+      "id": "y",
+      "position": "left"
+    }
+  },
+  "spanGaps": true
+};
+        
+        // Register plugins if needed
+        Chart.register(ChartDataLabels);
+
+        // Create chart with exact same configuration but remove redundant title
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    // Remove title from chart as it's now in the header
+                    title: {
+                        display: false
+                    },
+                    datalabels: {
+                        display: true,
+                        color: 'white',
+                        font: {
+                            weight: 'normal'
+                        },
+                        formatter: function(value) {
+                            if (true) {
+                                return parseFloat(value).toFixed(1) + '%';
+                            }
+                            return null;
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'yellow', // Change tooltip background to yellow
+                        titleColor: 'black', // Change title text color (optional)
+                        bodyColor: 'black', // Change body text color (optional)
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                
+                                if (true) {
+                                    label += parseFloat(context.parsed.y).toFixed(1) + '%';
+                                } else if (context.parsed.y !== null && context.parsed.y !== undefined) {
+                                    label += formatIndianNumber(context.parsed.y);
+                                } else {
+                                    label += 'No data'; // For null values, show 'No data' in tooltip
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    ...chartOptions.scales,
+                    y: {
+                        ...chartOptions.scales?.y,
+                        ticks: {
+                            callback: function(value) {
+                                if (true) {
+                                    return value + '%';
+                                }
+                                return formatIndianNumber(value);
+                            }
+                        }
+                    }
+                },
+                spanGaps: true // Don't connect points across null values for line charts
+            }
+        });
+
+        // If it's a percentage stacked bar chart, store original data for calculations
+        chart.originalData = {
+  "datasets": [
+    {
+      "backgroundColor": "#4e73df",
+      "borderColor": "#4e73df",
+      "borderWidth": 1,
+      "data": [
+        29.92,
+        30.13,
+        30.94,
+        31.95,
+        34.36,
+        36.23,
+        37.6,
+        38.53,
+        27.08
+      ],
+      "label": "Livestock"
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        70.08,
+        69.87,
+        69.06,
+        68.05,
+        65.64,
+        63.77,
+        62.4,
+        61.47,
+        72.92
+      ],
+      "label": "revenue and expenditure"
+    }
+  ],
+  "labels": [
+    "2012",
+    "2013",
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    
+  ]
+};
+
+        // Create custom legend container
+        const legendContainer = document.createElement('div');
+        legendContainer.className = 'custom-legend';
+        document.querySelector('.chart-canvas-container').insertBefore(legendContainer, myChart);
+
+        // Create legend items with checkboxes
+        chartData.datasets.forEach((dataset, index) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.style.backgroundColor = dataset.backgroundColor + '15';
+            legendItem.style.border = '1px solid ' + dataset.backgroundColor + '40';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true;
+
+            const label = document.createElement('span');
+            label.textContent = dataset.label;
+            label.style.color = dataset.backgroundColor;
+
+            legendItem.appendChild(checkbox);
+            legendItem.appendChild(label);
+
+            // Add click handlers
+            [checkbox, label, legendItem].forEach(element => {
+                element.addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    const meta = chart.getDatasetMeta(index);
+                    meta.hidden = !checkbox.checked;
+
+                    // Update legend item appearance
+                    legendItem.style.backgroundColor = checkbox.checked ? 
+                        dataset.backgroundColor + '15' : 
+                        '#f5f5f5';
+                    label.style.color = checkbox.checked ? 
+                        dataset.backgroundColor : 
+                        '#999';
+
+                    // If it's a percentage stacked bar chart, recalculate percentages
+                    if (true) {
+                        recalculatePercentages(chart);
+                    } else {
+                        chart.update();
+                    }
+                });
+            });
+
+            legendContainer.appendChild(legendItem);
+        });
+
+        
+
+        // Add the recalculatePercentages function if it's a percentage stacked bar chart
+        
+        function recalculatePercentages(chart) {
+            if (!chart || !chart.data || !chart.data.datasets) {
+                return;
+            }
+
+            // Store the current dataset visibility
+            const visibleDatasets = [];
+            chart.data.datasets.forEach((dataset, index) => {
+                const meta = chart.getDatasetMeta(index);
+                if (!meta || !meta.hidden) {
+                    visibleDatasets.push(index);
+                }
+            });
+
+            // We need to work with the original data (non-percentage) to recalculate
+            const originalData = chart.originalData || preFilteredData[document.getElementById('chartFilter').value] || originalChartData;
+            
+            if (!originalData || !originalData.datasets) {
+                console.error("Missing original data for percentage calculation");
+                return;
+            }
+
+            // Calculate totals for each data point using only visible datasets
+            const totals = Array(chart.data.labels.length).fill(0);
+            visibleDatasets.forEach(datasetIndex => {
+                if (datasetIndex < originalData.datasets.length) {
+                    const dataArray = originalData.datasets[datasetIndex].data;
+                    dataArray.forEach((value, index) => {
+                        if (index < totals.length) {
+                            totals[index] += Math.abs(parseFloat(value) || 0);
+                        }
+                    });
+                }
+            });
+
+            // Update percentages for all datasets
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                
+                if (meta) {
+                    if (!meta.hidden && datasetIndex < originalData.datasets.length) {
+                        const dataArray = originalData.datasets[datasetIndex].data;
+                        dataset.data = dataArray.map((value, index) => {
+                            if (index < totals.length && totals[index] > 0) {
+                                return (Math.abs(parseFloat(value) || 0) / totals[index]) * 100;
+                            }
+                            return 0;
+                        });
+                    } else {
+                        // Hidden datasets get zeros
+                        dataset.data = Array(chart.data.labels.length).fill(0);
+                    }
+                }
+            });
+
+            chart.update({
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        }
+        
+        // Make sure to call recalculatePercentages after initial chart setup
+        setTimeout(() => {
+            if ('bar' === 'bar' && chart.options.scales && 
+                chart.options.scales.y && chart.options.scales.y.stacked) {
+                recalculatePercentages(chart);
+            }
+        }, 200);
+
+        // Add download functionality
+        document.getElementById('downloadChartBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('myChart');
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'Untitled Chart.png';
+            link.href = image;
+            link.click();
+        });
+        
+        // Apply the initial filter value if one is selected
+        
+    </script>
+</body>
+</html>
