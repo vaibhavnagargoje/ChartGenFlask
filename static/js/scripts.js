@@ -532,6 +532,8 @@ document.addEventListener('DOMContentLoaded', function() {
             currentChart = LineChartHandler.createLineChart(chartData, chartCanvas);
         } else if (selectedChartType === 'bar') {
             currentChart = BarChartHandler.createBarChart(chartData, chartCanvas);
+        } else if (selectedChartType === 'stackedBar') {
+            currentChart = StackedBarChartHandler.createStackedBarChart(chartData, chartCanvas);
         } else {
             console.error('Unsupported chart type:', selectedChartType);
             alert('Unsupported chart type: ' + selectedChartType);
@@ -603,6 +605,8 @@ document.addEventListener('DOMContentLoaded', function() {
             LineChartHandler.updateLineChart(chartData, currentChart);
         } else if (selectedChartType === 'bar') {
             BarChartHandler.updateBarChart(chartData, currentChart);
+        } else if (selectedChartType === 'stackedBar') {
+            StackedBarChartHandler.updateStackedBarChart(chartData, currentChart);
         }
     }
     
@@ -793,6 +797,11 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         } else if (selectedChartType === 'bar') {
             html = BarChartHandler.generateBarChartHTML(
+                chartConfig, chartTitle, description, additionalInfo,
+                chartFilterColumn, chartFilterOptions, selectedFilterValue, preFilteredData
+            );
+        } else if (selectedChartType === 'stackedBar') {
+            html = StackedBarChartHandler.generateStackedBarChartHTML(
                 chartConfig, chartTitle, description, additionalInfo,
                 chartFilterColumn, chartFilterOptions, selectedFilterValue, preFilteredData
             );

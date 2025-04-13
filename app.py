@@ -372,7 +372,7 @@ def apply_chart_filter():
 
 # Helper function to process chart data
 def process_chart_data(df, x_axis, y_axes, chart_type):
-    if chart_type in ['line', 'bar']:
+    if chart_type in ['line', 'bar', 'stackedBar']:
         if df.empty:
             return {'labels': [], 'datasets': []}
             
@@ -431,6 +431,11 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
             elif chart_type == 'bar':
                 dataset.update({
                     'barPercentage': 0.8,
+                    'categoryPercentage': 0.8
+                })
+            elif chart_type == 'stackedBar':
+                dataset.update({
+                    'barPercentage': 0.9,
                     'categoryPercentage': 0.8
                 })
             
