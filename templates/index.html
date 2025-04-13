@@ -128,10 +128,6 @@
             <div id="chart-type-selection" class="chart-type-selection hidden">
                 <h2>3. Select Chart Type</h2>
                 <div class="chart-types-grid">
-                    
-                   
-                    
-                    
                     <div class="chart-type-card" data-type="line">
                         <div class="chart-icon">
                             <svg viewBox="0 0 24 24"><path d="M3,14L7,8L11,12L15,5L21,14"></path></svg>
@@ -139,6 +135,12 @@
                         <span>Line Chart</span>
                     </div>
                     
+                    <div class="chart-type-card" data-type="bar">
+                        <div class="chart-icon">
+                            <svg viewBox="0 0 24 24"><path d="M6,16H3V8H6V16ZM10,16H13V8H10V16ZM20,16H17V8H20V16Z"></path></svg>
+                        </div>
+                        <span>Bar Chart</span>
+                    </div>
                 </div>
                 <div class="chart-options">
                     <button id="generateChartBtn" class="action-btn">Generate Chart</button>
@@ -234,6 +236,9 @@
         </div>
     </div>
 
+    <!-- JavaScript Files -->
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/line.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bar.js') }}"></script>
 </body>
 </html>

@@ -372,7 +372,7 @@ def apply_chart_filter():
 
 # Helper function to process chart data
 def process_chart_data(df, x_axis, y_axes, chart_type):
-    if chart_type in ['line']:
+    if chart_type in ['line', 'bar']:
         if df.empty:
             return {'labels': [], 'datasets': []}
             
@@ -410,17 +410,29 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
                             value = None
                     y_data.append(value)
             
-            # Create dataset with explicit None values for missing data
+            # Create dataset with common properties for both line and bar charts
             dataset = {
                 'label': y_axis,
                 'data': y_data,
                 'backgroundColor': color,
                 'borderColor': color,
-                'borderWidth': 1,
-                'fill': False,
-                'tension': 0,
-                'spanGaps': False  # Don't connect points across null values
+                'borderWidth': 1
             }
+            
+            # Add chart-specific properties
+            if chart_type == 'line':
+                dataset.update({
+                    'fill': False,
+                    'tension': 0,
+                    'pointRadius': 0,
+                    'pointHoverRadius': 3,
+                    'spanGaps': False  # Don't connect points across null values
+                })
+            elif chart_type == 'bar':
+                dataset.update({
+                    'barPercentage': 0.8,
+                    'categoryPercentage': 0.8
+                })
             
             chart_data['datasets'].append(dataset)
         
@@ -428,13 +440,17 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
         chart_data = convert_to_serializable(chart_data)
         
         # Print for debugging
-        print("Chart data structure (first few values):")
+        print(f"Processing {chart_type} chart data")
         if chart_data and 'datasets' in chart_data and len(chart_data['datasets']) > 0:
             first_dataset = chart_data['datasets'][0]
             print(f"Dataset label: {first_dataset.get('label')}")
             print(f"First 5 data points: {first_dataset.get('data', [])[0:5]}")
         
         return chart_data
+    else:
+        # Unsupported chart type
+        print(f"Unsupported chart type: {chart_type}")
+        return {'labels': [], 'datasets': []}
 
 @app.route('/download_chart_code', methods=['POST'])
 def download_chart_code():
