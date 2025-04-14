@@ -79,7 +79,7 @@ const PercentStackedBarChartHandler = {
                     // Add datalabels plugin configuration to display percentages on the bars
                     datalabels: {
                         display: function(context) {
-                            return context.dataset.data[context.dataIndex] > 5; // Only show if percentage > 5%
+                            return context.dataset.data[context.dataIndex] > 0.1; // Only show if percentage > 5%
                         },
                         formatter: function(value) {
                             return value.toFixed(1) + '%';
@@ -588,7 +588,7 @@ const PercentStackedBarChartHandler = {
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: 'yellow', // Yellow tooltip background
+                        backgroundColor: 'white', // Yellow tooltip background
                         titleColor: 'black',
                         bodyColor: 'black',
                         callbacks: {
@@ -609,7 +609,7 @@ const PercentStackedBarChartHandler = {
                     },
                     datalabels: {
                         display: function(context) {
-                            return context.dataset.data[context.dataIndex] > 5; // Only show if percentage > 5%
+                            return context.dataset.data[context.dataIndex] > 0.1; // Only show if percentage > 5%
                         },
                         formatter: function(value) {
                             return formatPercentage(value);

@@ -410,7 +410,7 @@ const StackedBarChartHandler = {
                         display: false
                     },
                     tooltip: {
-                        backgroundColor: 'yellow', // Yellow tooltip background
+                        backgroundColor: 'white', // Yellow tooltip background
                         titleColor: 'black',
                         bodyColor: 'black',
                         callbacks: {
