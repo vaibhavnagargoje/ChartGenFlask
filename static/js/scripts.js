@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const uniqueValues = [...new Set(sheetData.map(row => row[column]).filter(val => val !== null))];
         
         // Clear and populate the filter value select
-        filterValueSelect.innerHTML = '<option value="">All Values</option>';
+        filterValueSelect.innerHTML = '<option value="">All</option>';
         
         uniqueValues.forEach(value => {
             const option = document.createElement('option');
@@ -415,13 +415,13 @@ document.addEventListener('DOMContentLoaded', function() {
             populateChartFilterValues(uniqueValues);
         } else {
             // Clear chart filter dropdown
-            chartFilterValue.innerHTML = '<option value="">All Values</option>';
+            chartFilterValue.innerHTML = '<option value="">All</option>';
         }
     });
     
     // Populate chart filter values
     function populateChartFilterValues(values) {
-        chartFilterValue.innerHTML = '<option value="">All Values</option>';
+        chartFilterValue.innerHTML = '<option value="">All</option>';
         
         values.forEach(value => {
             const option = document.createElement('option');
@@ -996,16 +996,16 @@ document.addEventListener('DOMContentLoaded', function() {
             margin-bottom: 30px;
         }
         .chart-description {
-            margin-top: 40px;
-            padding: 5px;
-            border-top: 1px solid #e9ecef;
+            margin-top: 0;
+            padding: 2px;
             font-size: 10px;
+            padding-left: 53px;
         }
         .chart-additional-info {
-            margin-top: 10px;
-            padding: 5px;
+            margin-top: 2px;
+            padding: 2px;
             font-size: 10px;
-            color: #6c757d;
+            padding-left: 53px;
         }
         .chart-footer {
             display: flex;

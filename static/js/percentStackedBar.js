@@ -64,6 +64,10 @@ const PercentStackedBarChartHandler = {
                     },
                     tooltip: {
                         callbacks: {
+                            animation: {
+                                duration: 50, // milliseconds (default is 400)
+                                easing: 'easeOutQuart' // easing function
+                              },
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
@@ -79,7 +83,7 @@ const PercentStackedBarChartHandler = {
                     // Add datalabels plugin configuration to display percentages on the bars
                     datalabels: {
                         display: function(context) {
-                            return context.dataset.data[context.dataIndex] > 0.1; // Only show if percentage > 5%
+                            return context.dataset.data[context.dataIndex] > 5; // Only show if percentage > 5%
                         },
                         formatter: function(value) {
                             return value.toFixed(1) + '%';
@@ -106,6 +110,9 @@ const PercentStackedBarChartHandler = {
                         beginAtZero: true,
                         min: 0,
                         max: 100, // Always show 0-100% scale
+                        grid:{
+                            color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
+                        },
                         ticks: {
                             callback: function(value) {
                                 return value + '%';
@@ -386,13 +393,14 @@ const PercentStackedBarChartHandler = {
         .chart-filter-controls {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 8px;
+            padding: 8px 8px 0px 8px;
             border-radius: 4px;
         }
         .chart-filter-group {
             display: flex;
             align-items: center;
+            margin-left: 45px;
+
         }
         .chart-filter-group label {
             margin-right: 5px;
@@ -424,13 +432,13 @@ const PercentStackedBarChartHandler = {
             margin-top: 0;
             padding: 2px;
             font-size: 10px;
-            padding-left: 70px;
+            padding-left: 53px;
         }
         .chart-additional-info {
             margin-top: 2px;
             padding: 2px;
             font-size: 10px;
-            padding-left: 70px;
+            padding-left: 53px;
         }
         .chart-actions {
             display: flex;
@@ -485,7 +493,7 @@ const PercentStackedBarChartHandler = {
             <div class="chart-filter-group">
                 <label for="chartFilter">${chartFilterColumn}</label>
                 <select id="chartFilter" onchange="filterChartData()">
-                    <option value="">All Values</option>
+                    <option value="">All</option>
                     ${chartFilterOptions.map(value => value ? `<option value="${value}" ${value === selectedFilterValue ? 'selected' : ''}>${value}</option>` : '').join('')}
                 </select>
             </div>
@@ -496,8 +504,8 @@ const PercentStackedBarChartHandler = {
         </div>
         <div class="chart-footer">
             <div class="chart-info">
+            ${additionalInfo ? `<div class="chart-additional-info">${additionalInfo}</div>` : ''}
                 ${description ? `<span class="chart-description">Source: ${description}</span>` : ''}
-                ${additionalInfo ? `<div class="chart-additional-info">${additionalInfo}</div>` : ''}
             </div>
             <div class="chart-actions">
                 <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
@@ -591,6 +599,10 @@ const PercentStackedBarChartHandler = {
                         backgroundColor: 'white', // Yellow tooltip background
                         titleColor: 'black',
                         bodyColor: 'black',
+                        animation: {
+                            duration: 50, // milliseconds (default is 400)
+                            easing: 'easeOutQuart' // easing function
+                        },
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -609,7 +621,7 @@ const PercentStackedBarChartHandler = {
                     },
                     datalabels: {
                         display: function(context) {
-                            return context.dataset.data[context.dataIndex] > 0.1; // Only show if percentage > 5%
+                            return context.dataset.data[context.dataIndex] > 5; // Only show if percentage > 5%
                         },
                         formatter: function(value) {
                             return formatPercentage(value);
@@ -657,11 +669,14 @@ const PercentStackedBarChartHandler = {
                         max: 100,
                         grid: {
                             drawBorder: false     // Show tick marks
+                            color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
+
                         },
                         ticks: {
                             callback: function(value) {
                                 return value + '%';
                             },
+                             stepSize: 20,
                             color: '#333'       // Optional: customize tick color
                         }
                     }
@@ -826,99 +841,99 @@ const PercentStackedBarChartHandler = {
         // Apply the initial filter value if one is selected
         ${selectedFilterValue ? 'setTimeout(() => filterChartData(), 100);' : ''}
         
-        // Create custom legend with checkboxes
-        function createCustomLegend() {
-            const legendContainer = document.createElement('div');
-            legendContainer.className = 'custom-legend';
+        // // Create custom legend with checkboxes
+        // function createCustomLegend() {
+        //     const legendContainer = document.createElement('div');
+        //     legendContainer.className = 'custom-legend';
             
-            chart.data.datasets.forEach((dataset, index) => {
-                const legendItem = document.createElement('div');
-                legendItem.className = 'legend-item';
-                legendItem.style.backgroundColor = dataset.backgroundColor + '15';
-                legendItem.style.border = '1px solid ' + dataset.backgroundColor + '40';
+        //     chart.data.datasets.forEach((dataset, index) => {
+        //         const legendItem = document.createElement('div');
+        //         legendItem.className = 'legend-item';
+        //         legendItem.style.backgroundColor = dataset.backgroundColor + '15';
+        //         legendItem.style.border = '1px solid ' + dataset.backgroundColor + '40';
                 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = true;
+        //         const checkbox = document.createElement('input');
+        //         checkbox.type = 'checkbox';
+        //         checkbox.checked = true;
                 
-                const label = document.createElement('span');
-                label.textContent = dataset.label;
-                label.style.color = dataset.backgroundColor;
+        //         const label = document.createElement('span');
+        //         label.textContent = dataset.label;
+        //         label.style.color = dataset.backgroundColor;
                 
-                legendItem.appendChild(checkbox);
-                legendItem.appendChild(label);
+        //         legendItem.appendChild(checkbox);
+        //         legendItem.appendChild(label);
                 
-                // Add click handlers
-                [checkbox, label, legendItem].forEach(element => {
-                    element.addEventListener('click', (e) => {
-                        if (e.target !== checkbox) {
-                            checkbox.checked = !checkbox.checked;
-                        }
+        //         // Add click handlers
+        //         [checkbox, label, legendItem].forEach(element => {
+        //             element.addEventListener('click', (e) => {
+        //                 if (e.target !== checkbox) {
+        //                     checkbox.checked = !checkbox.checked;
+        //                 }
                         
-                        const meta = chart.getDatasetMeta(index);
-                        meta.hidden = !checkbox.checked;
+        //                 const meta = chart.getDatasetMeta(index);
+        //                 meta.hidden = !checkbox.checked;
                         
-                        // Update legend item appearance
-                        legendItem.style.backgroundColor = checkbox.checked ? 
-                            dataset.backgroundColor + '15' : 
-                            '#f5f5f5';
-                        label.style.color = checkbox.checked ? 
-                            dataset.backgroundColor : 
-                            '#999';
+        //                 // Update legend item appearance
+        //                 legendItem.style.backgroundColor = checkbox.checked ? 
+        //                     dataset.backgroundColor + '15' : 
+        //                     '#f5f5f5';
+        //                 label.style.color = checkbox.checked ? 
+        //                     dataset.backgroundColor : 
+        //                     '#999';
                         
-                        // Recalculate percentages when toggling visibility
-                        const visibleDatasets = [];
-                        chart.data.datasets.forEach((ds, i) => {
-                            if (!chart.getDatasetMeta(i).hidden) {
-                                visibleDatasets.push(i);
-                            }
-                        });
+        //                 // Recalculate percentages when toggling visibility
+        //                 const visibleDatasets = [];
+        //                 chart.data.datasets.forEach((ds, i) => {
+        //                     if (!chart.getDatasetMeta(i).hidden) {
+        //                         visibleDatasets.push(i);
+        //                     }
+        //                 });
                         
-                        // Skip empty cases
-                        if (visibleDatasets.length > 0) {
-                            // Calculate totals for each x-axis position with visible datasets only
-                            for (let i = 0; i < chart.data.labels.length; i++) {
-                                let total = 0;
+        //                 // Skip empty cases
+        //                 if (visibleDatasets.length > 0) {
+        //                     // Calculate totals for each x-axis position with visible datasets only
+        //                     for (let i = 0; i < chart.data.labels.length; i++) {
+        //                         let total = 0;
                                 
-                                // Calculate total of visible datasets
-                                visibleDatasets.forEach(datasetIndex => {
-                                    const originalValue = chart.data.datasets[datasetIndex]._originalData[i];
-                                    if (originalValue !== null && originalValue !== undefined && !isNaN(originalValue)) {
-                                        total += Math.abs(parseFloat(originalValue));
-                                    }
-                                });
+        //                         // Calculate total of visible datasets
+        //                         visibleDatasets.forEach(datasetIndex => {
+        //                             const originalValue = chart.data.datasets[datasetIndex]._originalData[i];
+        //                             if (originalValue !== null && originalValue !== undefined && !isNaN(originalValue)) {
+        //                                 total += Math.abs(parseFloat(originalValue));
+        //                             }
+        //                         });
                                 
-                                // Update percentages for all datasets
-                                chart.data.datasets.forEach((ds, datasetIndex) => {
-                                    const originalValue = ds._originalData ? ds._originalData[i] : 0;
+        //                         // Update percentages for all datasets
+        //                         chart.data.datasets.forEach((ds, datasetIndex) => {
+        //                             const originalValue = ds._originalData ? ds._originalData[i] : 0;
                                     
-                                    if (visibleDatasets.includes(datasetIndex) && total > 0) {
-                                        if (originalValue !== null && originalValue !== undefined && !isNaN(originalValue)) {
-                                            ds.data[i] = (Math.abs(parseFloat(originalValue)) / total) * 100;
-                                        } else {
-                                            ds.data[i] = 0;
-                                        }
-                                    } else {
-                                        ds.data[i] = 0;
-                                    }
-                                });
-                            }
-                        }
+        //                             if (visibleDatasets.includes(datasetIndex) && total > 0) {
+        //                                 if (originalValue !== null && originalValue !== undefined && !isNaN(originalValue)) {
+        //                                     ds.data[i] = (Math.abs(parseFloat(originalValue)) / total) * 100;
+        //                                 } else {
+        //                                     ds.data[i] = 0;
+        //                                 }
+        //                             } else {
+        //                                 ds.data[i] = 0;
+        //                             }
+        //                         });
+        //                     }
+        //                 }
                         
-                        chart.update();
-                    });
-                });
+        //                 chart.update();
+        //             });
+        //         });
                 
-                legendContainer.appendChild(legendItem);
-            });
+        //         legendContainer.appendChild(legendItem);
+        //     });
             
-            // Add legend before the chart
-            const chartContainer = document.querySelector('.chart-canvas-container');
-            chartContainer.parentElement.insertBefore(legendContainer, chartContainer);
-        }
+        //     // Add legend before the chart
+        //     const chartContainer = document.querySelector('.chart-canvas-container');
+        //     chartContainer.parentElement.insertBefore(legendContainer, chartContainer);
+        // }
         
-        // Create the custom legend after chart is ready
-        setTimeout(createCustomLegend, 100);
+        // // Create the custom legend after chart is ready
+        // setTimeout(createCustomLegend, 100);
     </script>
 </body>
 </html>`;

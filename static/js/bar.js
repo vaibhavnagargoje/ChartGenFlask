@@ -65,6 +65,10 @@ const BarChartHandler = {
                         display: false,
                     },
                     tooltip: {
+                        animation: {
+                            duration: 50, // milliseconds (default is 400)
+                            easing: 'easeOutQuart' // easing function
+                          },
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -94,7 +98,9 @@ const BarChartHandler = {
                         ticks: {
                             callback: function(value) {
                                 return formatIndianNumber(value);
-                            }
+                            },
+                            maxTicksLimit: 6,
+                            color: '#333' // Optional: customize tick color
                         }
                     }
                 }
@@ -241,13 +247,14 @@ const BarChartHandler = {
         .chart-filter-controls {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 8px;
+            padding: 8px 8px 0px 8px;
             border-radius: 4px;
         }
         .chart-filter-group {
             display: flex;
             align-items: center;
+            margin-left:45px;
+
         }
         .chart-filter-group label {
             margin-right: 5px;
@@ -279,13 +286,13 @@ const BarChartHandler = {
             margin-top: 0;
             padding: 2px;
             font-size: 10px;
-            padding-left: 70px;
+            padding-left: 53px;
         }
         .chart-additional-info {
             margin-top: 2px;
             padding: 2px;
             font-size: 10px;
-            padding-left: 70px;
+            padding-left: 53px;
         }
         .chart-actions {
             display: flex;
@@ -322,7 +329,7 @@ const BarChartHandler = {
             <div class="chart-filter-group">
                 <label for="chartFilter">${chartFilterColumn}</label>
                 <select id="chartFilter" onchange="filterChartData()">
-                    <option value="">All Values</option>
+                    <option value="">All</option>
                     ${chartFilterOptions.map(value => value ? `<option value="${value}" ${value === selectedFilterValue ? 'selected' : ''}>${value}</option>` : '').join('')}
                 </select>
             </div>
@@ -332,9 +339,9 @@ const BarChartHandler = {
             <canvas id="myChart"></canvas>
         </div>
         <div class="chart-footer">
-            <div class="chart-info">
-                ${description ? `<span class="chart-description">Source: ${description}</span>` : ''}
-                ${additionalInfo ? `<div class="chart-additional-info">${additionalInfo}</div>` : ''}
+        <div class="chart-info">
+        ${additionalInfo ? `<div class="chart-additional-info">${additionalInfo}</div>` : ''}
+        ${description ? `<span class="chart-description">Source: ${description}</span>` : ''}
             </div>
             <div class="chart-actions">
                 <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
@@ -411,6 +418,10 @@ const BarChartHandler = {
                         backgroundColor: 'white', // Yellow tooltip background
                         titleColor: 'black',
                         bodyColor: 'black',
+                        animation: {
+        duration: 50, // milliseconds (default is 400)
+        easing: 'easeOutQuart' // easing function
+      },
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -460,11 +471,13 @@ const BarChartHandler = {
                         beginAtZero: true,
                         grid: {
                             drawBorder: false     // ✅ Show tick marks
+                            color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
                         },
                         ticks: {
                             callback: function(value) {
                                 return formatIndianNumber(value);
                             },
+                            maxTicksLimit: 6,
                             color: '#333'       // Optional: customize tick color
                         }
                     }

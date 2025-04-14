@@ -1,201 +1,9 @@
-/**
- * Line Chart Module
- * Handles all functionality related to line charts
- */
 
-// Line Chart Handler Object
-const LineChartHandler = {
-    // Create line chart with Chart.js
-    createLineChart: function(chartData, chartCanvas, currentChart) {
-        // Clean up existing custom legend if any
-        const existingLegend = chartCanvas.parentElement.querySelector('.custom-legend');
-        if (existingLegend) {
-            existingLegend.remove();
-        }
-        
-        // Clear the canvas
-        const ctx = chartCanvas.getContext('2d');
-        ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-        
-        // Set appropriate height for the chart container
-        chartCanvas.parentElement.style.height = '600px';
-        
-        // Default color palette
-        const colorPalette = [
-            '#1a4570', '#ee8939', '#f5b843', '#8b3834', '#e0ba3f',
-            '#e6e770', '#4d83c5', '#d3a037', '#779c51', '#b2d571'
-        ];
-        
-        // Apply color palette to datasets if not already set
-        for (let i = 0; i < chartData.datasets.length; i++) {
-            const dataset = chartData.datasets[i];
-            if (!dataset.backgroundColor || dataset.backgroundColor === 'rgba(243, 124, 5, 0.88)' ||
-                dataset.backgroundColor.startsWith('rgba(26, 69, 112,')) {
-                const colorIndex = i % colorPalette.length;
-                dataset.backgroundColor = colorPalette[colorIndex];
-                dataset.borderColor = colorPalette[colorIndex];
-            }
-        }
-        
-        // Set line chart specific options
-        chartData.datasets.forEach(dataset => {
-            dataset.fill = false;
-            dataset.tension = 0; // Line smoothness
-            dataset.borderWidth = 1;
-            dataset.pointRadius = 0;
-            dataset.pointBackgroundColor = dataset.borderColor;
-            dataset.pointHoverRadius = 3;
-            dataset.spanGaps = false; // Don't connect points across null values
-            
-            // Make sure null values are preserved (not converted to 0)
-            dataset.data = dataset.data.map(value => 
-                value === null || value === undefined || Number.isNaN(value) ? null : value
-            );
-        });
-        
-        // Set chart configuration for line charts
-        const config = {
-            type: 'line',
-            data: chartData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 750,
-                    easing: 'easeInOutQuart'
-                },
-                plugins: {
-                    legend: {
-                        display: false,
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: true
-                        }
-                    },
-                    y: {
-                        grid: {
-                            drawBorder: false,
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return formatIndianNumber(value);
-                            },
-                            maxTicksLimit: 6,
-                            color: '#333',
 
-                        }
-                    }
-                },
-                spanGaps: false // Important: this must be false to break lines at null values
-            }
-        };
-        
-        // Log the final config before creating the chart
-        console.log("Line chart configuration:", config);
-        
-        // Create the chart
-        try {
-            const newChart = new Chart(ctx, config);
-            console.log("Line chart created successfully");
-            
-            // Create custom legend
-            this.createCustomLegend(chartData, newChart, chartCanvas);
-            
-            return newChart;
-        } catch (error) {
-            console.error("Error creating line chart:", error);
-            alert("Error creating chart: " + error.message);
-            return null;
-        }
-    },
-    
-    // Create a custom legend for line charts
-    createCustomLegend: function(chartData, chart, chartCanvas) {
-        const legendContainer = document.createElement('div');
-        legendContainer.className = 'custom-legend';
-        
-        chartData.datasets.forEach((dataset, index) => {
-            const legendItem = document.createElement('div');
-            legendItem.className = 'legend-item';
-            legendItem.style.backgroundColor = dataset.borderColor + '15';
-            legendItem.style.border = '1px solid ' + dataset.borderColor + '40';
-            
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = true;
-            
-            const label = document.createElement('span');
-            label.textContent = dataset.label;
-            label.style.color = dataset.borderColor;
-            
-            legendItem.appendChild(checkbox);
-            legendItem.appendChild(label);
-            
-            // Add click handlers
-            [checkbox, label, legendItem].forEach(element => {
-                element.addEventListener('click', (e) => {
-                    if (e.target !== checkbox) {
-                        checkbox.checked = !checkbox.checked;
-                    }
-                    
-                    const meta = chart.getDatasetMeta(index);
-                    meta.hidden = !checkbox.checked;
-                    
-                    // Update legend item appearance
-                    legendItem.style.backgroundColor = checkbox.checked ? 
-                        dataset.borderColor + '15' : 
-                        '#f5f5f5';
-                    label.style.color = checkbox.checked ? 
-                        dataset.borderColor : 
-                        '#999';
-                    
-                    chart.update();
-                });
-            });
-            
-            legendContainer.appendChild(legendItem);
-        });
-        
-        // Add legend to the chart container
-        chartCanvas.parentElement.insertBefore(legendContainer, chartCanvas);
-    },
-    
-    // Update an existing line chart with new data
-    updateLineChart: function(chartData, chart) {
-        if (!chart) return;
-        
-        // Update the chart data
-        chart.data.labels = chartData.labels;
-        
-        // Update each dataset
-        for (let i = 0; i < chartData.datasets.length; i++) {
-            if (i < chart.data.datasets.length) {
-                // Preserve hidden state
-                const wasHidden = chart.getDatasetMeta(i).hidden;
-                
-                // Update data
-                chart.data.datasets[i].data = chartData.datasets[i].data;
-                
-                // Restore hidden state
-                chart.getDatasetMeta(i).hidden = wasHidden;
-            }
-        }
-        
-        // Update the chart
-        chart.update();
-    },
-    
-    // Generate HTML for exporting line chart
-    generateLineChartHTML: function(chartConfig, chartTitle, description, additionalInfo, chartFilterColumn, chartFilterOptions, selectedFilterValue, preFilteredData) {
-        return `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${chartTitle}</title>
+    <title>Excel Data Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
     <style>
@@ -307,27 +115,27 @@ const LineChartHandler = {
 <body>
     <div class="chart-container">
         <div class="chart-header">
-            <div class="chart-title">${chartTitle}</div>
+            <div class="chart-title">Excel Data Chart</div>
             <img class="chart-logo" src="logo.png" alt="ChartFlask Logo">
         </div>
-        ${chartFilterColumn ? `
+        
         <div class="chart-filter-controls">
             <div class="chart-filter-group">
-                <label for="chartFilter">${chartFilterColumn}</label>
+                <label for="chartFilter">District</label>
                 <select id="chartFilter" onchange="filterChartData()">
                     <option value="">All</option>
-                    ${chartFilterOptions.map(value => value ? `<option value="${value}" ${value === selectedFilterValue ? 'selected' : ''}>${value}</option>` : '').join('')}
+                    <option value="Ahmednagar" >Ahmednagar</option>
                 </select>
             </div>
         </div>
-        ` : ''}
+        
         <div class="chart-canvas-container">
             <canvas id="myChart"></canvas>
         </div>
         <div class="chart-footer">
             <div class="chart-info">
-            ${additionalInfo ? `<div class="chart-additional-info">${additionalInfo}</div>` : ''}
-                ${description ? `<span class="chart-description">Source: ${description}</span>` : ''}
+            
+                
             </div>
             <div class="chart-actions">
                 <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
@@ -360,7 +168,7 @@ const LineChartHandler = {
                 
                 let formattedRemaining = '';
                 if (remaining) {
-                    formattedRemaining = remaining.replace(/\\B(?=(\\d{2})+(?!\\d))/g, ',');
+                    formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
                 }
                 
                 formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
@@ -374,15 +182,469 @@ const LineChartHandler = {
         }
 
         // Store original chart data for filtering
-        const originalChartData = ${JSON.stringify(chartConfig.data, null, 2)};
+        const originalChartData = {
+  "datasets": [
+    {
+      "backgroundColor": "#1a4570",
+      "borderColor": "#1a4570",
+      "borderWidth": 1,
+      "data": [
+        578,
+        578,
+        555,
+        559,
+        562,
+        596,
+        593,
+        619,
+        615
+      ],
+      "fill": false,
+      "label": "Forestry and Logging",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#1a4570"
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        3513,
+        3632,
+        4278,
+        4675,
+        4855,
+        5173,
+        5468,
+        6033,
+        6303
+      ],
+      "fill": false,
+      "label": "Livestock",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#ee8939"
+    },
+    {
+      "backgroundColor": "#f5b843",
+      "borderColor": "#f5b843",
+      "borderWidth": 1,
+      "data": [
+        14,
+        8,
+        15,
+        15,
+        9,
+        9,
+        12,
+        13,
+        19
+      ],
+      "fill": false,
+      "label": "Fishing and aquaculture",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#f5b843"
+    },
+    {
+      "backgroundColor": "#8b3834",
+      "borderColor": "#8b3834",
+      "borderWidth": 1,
+      "data": [
+        10147,
+        9242,
+        11334,
+        11380,
+        10161,
+        11232,
+        13153,
+        12929,
+        12609
+      ],
+      "fill": false,
+      "label": "Agriculture & Allied Activities",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#8b3834"
+    }
+  ],
+  "labels": [
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ]
+};
         
         // Pre-filtered data for each district
-        const preFilteredData = ${JSON.stringify(preFilteredData, null, 2)};
+        const preFilteredData = {
+  "Ahmednagar": {
+    "datasets": [
+      {
+        "backgroundColor": "#1a4570",
+        "borderColor": "#1a4570",
+        "borderWidth": 1,
+        "data": [
+          578,
+          578,
+          555,
+          559,
+          562,
+          596,
+          593,
+          619,
+          615
+        ],
+        "fill": false,
+        "label": "Forestry and Logging",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          3513,
+          3632,
+          4278,
+          4675,
+          4855,
+          5173,
+          5468,
+          6033,
+          6303
+        ],
+        "fill": false,
+        "label": "Livestock",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#f5b843",
+        "borderColor": "#f5b843",
+        "borderWidth": 1,
+        "data": [
+          14,
+          8,
+          15,
+          15,
+          9,
+          9,
+          12,
+          13,
+          19
+        ],
+        "fill": false,
+        "label": "Fishing and aquaculture",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#8b3834",
+        "borderColor": "#8b3834",
+        "borderWidth": 1,
+        "data": [
+          10147,
+          9242,
+          11334,
+          11380,
+          10161,
+          11232,
+          13153,
+          12929,
+          12609
+        ],
+        "fill": false,
+        "label": "Agriculture & Allied Activities",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ]
+  }
+};
 
         // Chart configuration
         const ctx = document.getElementById('myChart').getContext('2d');
-        const chartData = ${JSON.stringify(chartConfig.data, null, 2)};
-        const chartOptions = ${JSON.stringify(chartConfig.options, null, 2)};
+        const chartData = {
+  "datasets": [
+    {
+      "backgroundColor": "#1a4570",
+      "borderColor": "#1a4570",
+      "borderWidth": 1,
+      "data": [
+        578,
+        578,
+        555,
+        559,
+        562,
+        596,
+        593,
+        619,
+        615
+      ],
+      "fill": false,
+      "label": "Forestry and Logging",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#1a4570"
+    },
+    {
+      "backgroundColor": "#ee8939",
+      "borderColor": "#ee8939",
+      "borderWidth": 1,
+      "data": [
+        3513,
+        3632,
+        4278,
+        4675,
+        4855,
+        5173,
+        5468,
+        6033,
+        6303
+      ],
+      "fill": false,
+      "label": "Livestock",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#ee8939"
+    },
+    {
+      "backgroundColor": "#f5b843",
+      "borderColor": "#f5b843",
+      "borderWidth": 1,
+      "data": [
+        14,
+        8,
+        15,
+        15,
+        9,
+        9,
+        12,
+        13,
+        19
+      ],
+      "fill": false,
+      "label": "Fishing and aquaculture",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#f5b843"
+    },
+    {
+      "backgroundColor": "#8b3834",
+      "borderColor": "#8b3834",
+      "borderWidth": 1,
+      "data": [
+        10147,
+        9242,
+        11334,
+        11380,
+        10161,
+        11232,
+        13153,
+        12929,
+        12609
+      ],
+      "fill": false,
+      "label": "Agriculture & Allied Activities",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
+      "spanGaps": false,
+      "tension": 0,
+      "pointBackgroundColor": "#8b3834"
+    }
+  ],
+  "labels": [
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ]
+};
+        const chartOptions = {
+  "responsive": true,
+  "maintainAspectRatio": false,
+  "animation": {
+    "duration": 750,
+    "easing": "easeInOutQuart"
+  },
+  "plugins": {
+    "legend": {
+      "display": false
+    },
+    "title": {
+      "text": "Excel Data Chart",
+      "display": true
+    }
+  },
+  "scales": {
+    "x": {
+      "axis": "x",
+      "grid": {
+        "display": false,
+        "drawBorder": true,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "offset": false,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "type": "category",
+      "ticks": {
+        "minRotation": 0,
+        "maxRotation": 50,
+        "mirror": false,
+        "textStrokeWidth": 0,
+        "textStrokeColor": "",
+        "padding": 3,
+        "display": true,
+        "autoSkip": true,
+        "autoSkipPadding": 3,
+        "labelOffset": 0,
+        "minor": {},
+        "major": {},
+        "align": "center",
+        "crossAlign": "near",
+        "showLabelBackdrop": false,
+        "backdropColor": "rgba(255, 255, 255, 0.75)",
+        "backdropPadding": 2,
+        "color": "#666"
+      },
+      "display": true,
+      "offset": false,
+      "reverse": false,
+      "beginAtZero": false,
+      "bounds": "ticks",
+      "clip": true,
+      "grace": 0,
+      "border": {
+        "display": true,
+        "dash": [],
+        "dashOffset": 0,
+        "width": 1,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "title": {
+        "display": true,
+        "text": "revenue and expenditure",
+        "padding": {
+          "top": 4,
+          "bottom": 4
+        },
+        "color": "#666"
+      },
+      "id": "x",
+      "position": "bottom"
+    },
+    "y": {
+      "axis": "y",
+      "grid": {
+        "drawBorder": false,
+        "display": true,
+        "lineWidth": 1,
+        "drawOnChartArea": true,
+        "drawTicks": true,
+        "tickLength": 8,
+        "offset": false,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "ticks": {
+        "maxTicksLimit": 6,
+        "color": "#333",
+        "minRotation": 0,
+        "maxRotation": 50,
+        "mirror": false,
+        "textStrokeWidth": 0,
+        "textStrokeColor": "",
+        "padding": 3,
+        "display": true,
+        "autoSkip": true,
+        "autoSkipPadding": 3,
+        "labelOffset": 0,
+        "minor": {},
+        "major": {},
+        "align": "center",
+        "crossAlign": "near",
+        "showLabelBackdrop": false,
+        "backdropColor": "rgba(255, 255, 255, 0.75)",
+        "backdropPadding": 2
+      },
+      "type": "linear",
+      "display": true,
+      "offset": false,
+      "reverse": false,
+      "beginAtZero": false,
+      "bounds": "ticks",
+      "clip": true,
+      "grace": 0,
+      "border": {
+        "display": true,
+        "dash": [],
+        "dashOffset": 0,
+        "width": 1,
+        "color": "rgba(0,0,0,0.1)"
+      },
+      "title": {
+        "display": true,
+        "text": "Percentage (%)",
+        "padding": {
+          "top": 4,
+          "bottom": 4
+        },
+        "color": "#666"
+      },
+      "id": "y",
+      "position": "left"
+    }
+  },
+  "spanGaps": false
+};
 
         // Create chart with exact same configuration but remove redundant title
         const hasMin = chartOptions?.scales?.y?.min !== undefined;
@@ -456,7 +718,7 @@ const LineChartHandler = {
                     },
                     y: {
                         ...chartOptions.scales?.y,
-                         offset: hasMin,
+                        offset: hasMin,
                         grid: {
                             color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
 
@@ -475,7 +737,7 @@ const LineChartHandler = {
             }
         });
 
-        ${chartFilterColumn ? `
+        
         // Function to filter chart data based on selected value
         function filterChartData() {
             const filterValue = document.getElementById('chartFilter').value;
@@ -592,72 +854,20 @@ const LineChartHandler = {
                 }
             }, 4000);
         }
-        ` : ''}
+        
 
         // Add download functionality
         document.getElementById('downloadChartBtn').addEventListener('click', function() {
             const canvas = document.getElementById('myChart');
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = '${chartTitle.replace(/\\s+/g, '_')}.png';
+            link.download = 'Excel Data Chart.png';
             link.href = image;
             link.click();
         });
         
         // Apply the initial filter value if one is selected
-        ${selectedFilterValue ? 'setTimeout(() => filterChartData(), 100);' : ''}
+        
     </script>
 </body>
-</html>`;
-    }
-};
-
-// Format number in Indian format (e.g., 1,00,000)
-function formatIndianNumber(num) {
-    if (num === null || num === undefined || isNaN(num)) return '';  // Return empty string for null values
-    
-    // Handle negative numbers
-    let isNegative = false;
-    if (num < 0) {
-        isNegative = true;
-        num = Math.abs(num);
-    }
-    
-    // Format number to handle different magnitudes properly
-    let formattedNumber;
-    
-    // For numbers less than 1,000, no special formatting needed
-    if (num < 1000) {
-        formattedNumber = num.toString();
-    } else {
-        // Convert to string and split at decimal point
-        const parts = num.toString().split('.');
-        let integerPart = parts[0];
-        
-        // First we get the last 3 digits
-        const lastThree = integerPart.substring(integerPart.length - 3);
-        // Then we get the remaining digits
-        const remaining = integerPart.substring(0, integerPart.length - 3);
-        
-        // Now we format the remaining digits with commas after every 2 digits
-        let formattedRemaining = '';
-        if (remaining) {
-            formattedRemaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
-        }
-        
-        // Combine the parts
-        formattedNumber = formattedRemaining ? formattedRemaining + ',' + lastThree : lastThree;
-        
-        // Add decimal part if exists
-        if (parts.length > 1) {
-            formattedNumber += '.' + parts[1];
-        }
-    }
-    
-    // Add negative sign if needed
-    if (isNegative) {
-        formattedNumber = '-' + formattedNumber;
-    }
-    
-    return formattedNumber;
-}
+</html>

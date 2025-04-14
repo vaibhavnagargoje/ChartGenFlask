@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>sdfgsdfg</title>
+    <title>fdajasdklf;alsdf</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400&display=swap" rel="stylesheet">
     <style>
@@ -33,24 +33,22 @@
             color: #2c3e50;
             flex-grow: 1;
             text-align: center;
-             margin-left: 90px;
+            margin-left: 90px;
         }
         .chart-logo {
             width: 90px;
             height: auto;
-            
         }
         .chart-filter-controls {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-           
-            padding: 8px;
+            padding: 8px 8px 0px 8px;
             border-radius: 4px;
         }
         .chart-filter-group {
             display: flex;
             align-items: center;
+            margin-left:45px;
         }
         .chart-filter-group label {
             margin-right: 5px;
@@ -82,13 +80,13 @@
             margin-top: 0;
             padding: 2px;
             font-size: 10px;
-            padding-left: 70px;
+            padding-left: 53px;
         }
         .chart-additional-info {
             margin-top: 2px;
             padding: 2px;
             font-size: 10px;
-            padding-left: 70px;
+            padding-left: 53px;
         }
         .chart-actions {
             display: flex;
@@ -112,15 +110,12 @@
             transform: translateY(-2px);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-      
-       
-       
     </style>
 </head>
 <body>
     <div class="chart-container">
         <div class="chart-header">
-            <div class="chart-title">sdfgsdfg</div>
+            <div class="chart-title">fdajasdklf;alsdf</div>
             <img class="chart-logo" src="logo.png" alt="ChartFlask Logo">
         </div>
         
@@ -128,7 +123,7 @@
             <div class="chart-filter-group">
                 <label for="chartFilter">Taluka</label>
                 <select id="chartFilter" onchange="filterChartData()">
-                    <option value="">All Values</option>
+                    <option value="">All</option>
                     <option value="Devgad" >Devgad</option><option value="Vaibhavwadi" >Vaibhavwadi</option><option value="Kankavali" >Kankavali</option><option value="Malvan" >Malvan</option><option value="Vengurla" >Vengurla</option><option value="Kudal" >Kudal</option><option value="Sawantwadi" >Sawantwadi</option><option value="Dodamarg" >Dodamarg</option><option value="Kankawali" >Kankawali</option><option value="Malwan" >Malwan</option><option value="Savantwadi" >Savantwadi</option>
                 </select>
             </div>
@@ -139,8 +134,8 @@
         </div>
         <div class="chart-footer">
             <div class="chart-info">
-                
-                
+            <div class="chart-additional-info">asdhfkasdljf;asdf</div>
+                <span class="chart-description">Source: klasdfkasdkfj;klaw</span>
             </div>
             <div class="chart-actions">
                 <button id="downloadChartBtn" class="icon-btn" title="Download Chart">
@@ -207,11 +202,11 @@
       ],
       "fill": false,
       "label": "Deposits",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
       "spanGaps": false,
       "tension": 0,
-      "pointRadius": 0,
-      "pointBackgroundColor": "#1a4570",
-      "pointHoverRadius": 3
+      "pointBackgroundColor": "#1a4570"
     },
     {
       "backgroundColor": "#ee8939",
@@ -231,11 +226,11 @@
       ],
       "fill": false,
       "label": "Total Loan",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
       "spanGaps": false,
       "tension": 0,
-      "pointRadius": 0,
-      "pointBackgroundColor": "#ee8939",
-      "pointHoverRadius": 3
+      "pointBackgroundColor": "#ee8939"
     }
   ],
   "labels": [
@@ -274,6 +269,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -295,162 +292,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
-        "spanGaps": false,
-        "tension": 0
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018,
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Kankavali": {
-    "datasets": [
-      {
-        "backgroundColor": "#1a4570",
-        "borderColor": "#1a4570",
-        "borderWidth": 1,
-        "data": [
-          null,
-          61123,
-          61123,
-          68123,
-          91243,
-          106215,
-          null
-        ],
-        "fill": false,
-        "label": "Deposits",
-        "spanGaps": false,
-        "tension": 0
-      },
-      {
-        "backgroundColor": "#ee8939",
-        "borderColor": "#ee8939",
-        "borderWidth": 1,
-        "data": [
-          0,
-          25467,
-          25467,
-          28467,
-          23035,
-          27973,
-          0
-        ],
-        "fill": false,
-        "label": "Total Loan",
-        "spanGaps": false,
-        "tension": 0
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018
-    ]
-  },
-  "Malvan": {
-    "datasets": [
-      {
-        "backgroundColor": "#1a4570",
-        "borderColor": "#1a4570",
-        "borderWidth": 1,
-        "data": [
-          null,
-          45243,
-          45243,
-          50913,
-          58916,
-          63729,
-          null
-        ],
-        "fill": false,
-        "label": "Deposits",
-        "spanGaps": false,
-        "tension": 0
-      },
-      {
-        "backgroundColor": "#ee8939",
-        "borderColor": "#ee8939",
-        "borderWidth": 1,
-        "data": [
-          0,
-          19231,
-          19231,
-          21831,
-          100065,
-          107412,
-          0
-        ],
-        "fill": false,
-        "label": "Total Loan",
-        "spanGaps": false,
-        "tension": 0
-      }
-    ],
-    "labels": [
-      2012,
-      2013,
-      2014,
-      2015,
-      2016,
-      2017,
-      2018
-    ]
-  },
-  "Vengurla": {
-    "datasets": [
-      {
-        "backgroundColor": "#1a4570",
-        "borderColor": "#1a4570",
-        "borderWidth": 1,
-        "data": [
-          null,
-          40263,
-          40263,
-          43633,
-          69743,
-          70810,
-          null,
-          174117,
-          83016,
-          86637
-        ],
-        "fill": false,
-        "label": "Deposits",
-        "spanGaps": false,
-        "tension": 0
-      },
-      {
-        "backgroundColor": "#ee8939",
-        "borderColor": "#ee8939",
-        "borderWidth": 1,
-        "data": [
-          0,
-          16437,
-          16437,
-          19107,
-          82557,
-          89989,
-          0,
-          16251,
-          9970,
-          33168
-        ],
-        "fill": false,
-        "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -488,6 +331,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -509,6 +354,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -524,6 +371,174 @@
       2019,
       2020,
       2021
+    ]
+  },
+  "Vengurla": {
+    "datasets": [
+      {
+        "backgroundColor": "#1a4570",
+        "borderColor": "#1a4570",
+        "borderWidth": 1,
+        "data": [
+          null,
+          40263,
+          40263,
+          43633,
+          69743,
+          70810,
+          null,
+          174117,
+          83016,
+          86637
+        ],
+        "fill": false,
+        "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          16437,
+          16437,
+          19107,
+          82557,
+          89989,
+          0,
+          16251,
+          9970,
+          33168
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Kankavali": {
+    "datasets": [
+      {
+        "backgroundColor": "#1a4570",
+        "borderColor": "#1a4570",
+        "borderWidth": 1,
+        "data": [
+          null,
+          61123,
+          61123,
+          68123,
+          91243,
+          106215,
+          null
+        ],
+        "fill": false,
+        "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          25467,
+          25467,
+          28467,
+          23035,
+          27973,
+          0
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
+    ]
+  },
+  "Malvan": {
+    "datasets": [
+      {
+        "backgroundColor": "#1a4570",
+        "borderColor": "#1a4570",
+        "borderWidth": 1,
+        "data": [
+          null,
+          45243,
+          45243,
+          50913,
+          58916,
+          63729,
+          null
+        ],
+        "fill": false,
+        "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          0,
+          19231,
+          19231,
+          21831,
+          100065,
+          107412,
+          0
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
     ]
   },
   "Kudal": {
@@ -546,6 +561,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -567,6 +584,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -601,6 +620,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -619,6 +640,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -653,6 +676,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -674,6 +699,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -686,6 +713,47 @@
       2016,
       2017,
       2018,
+      2019,
+      2020,
+      2021
+    ]
+  },
+  "Kankawali": {
+    "datasets": [
+      {
+        "backgroundColor": "#1a4570",
+        "borderColor": "#1a4570",
+        "borderWidth": 1,
+        "data": [
+          144517,
+          147584,
+          160439
+        ],
+        "fill": false,
+        "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      },
+      {
+        "backgroundColor": "#ee8939",
+        "borderColor": "#ee8939",
+        "borderWidth": 1,
+        "data": [
+          14052,
+          17724,
+          85735
+        ],
+        "fill": false,
+        "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
+        "spanGaps": false,
+        "tension": 0
+      }
+    ],
+    "labels": [
       2019,
       2020,
       2021
@@ -704,6 +772,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -718,6 +788,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -741,6 +813,8 @@
         ],
         "fill": false,
         "label": "Deposits",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       },
@@ -755,43 +829,8 @@
         ],
         "fill": false,
         "label": "Total Loan",
-        "spanGaps": false,
-        "tension": 0
-      }
-    ],
-    "labels": [
-      2019,
-      2020,
-      2021
-    ]
-  },
-  "Kankawali": {
-    "datasets": [
-      {
-        "backgroundColor": "#1a4570",
-        "borderColor": "#1a4570",
-        "borderWidth": 1,
-        "data": [
-          144517,
-          147584,
-          160439
-        ],
-        "fill": false,
-        "label": "Deposits",
-        "spanGaps": false,
-        "tension": 0
-      },
-      {
-        "backgroundColor": "#ee8939",
-        "borderColor": "#ee8939",
-        "borderWidth": 1,
-        "data": [
-          14052,
-          17724,
-          85735
-        ],
-        "fill": false,
-        "label": "Total Loan",
+        "pointHoverRadius": 3,
+        "pointRadius": 0,
         "spanGaps": false,
         "tension": 0
       }
@@ -826,11 +865,11 @@
       ],
       "fill": false,
       "label": "Deposits",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
       "spanGaps": false,
       "tension": 0,
-      "pointRadius": 0,
-      "pointBackgroundColor": "#1a4570",
-      "pointHoverRadius": 3
+      "pointBackgroundColor": "#1a4570"
     },
     {
       "backgroundColor": "#ee8939",
@@ -850,11 +889,11 @@
       ],
       "fill": false,
       "label": "Total Loan",
+      "pointHoverRadius": 3,
+      "pointRadius": 0,
       "spanGaps": false,
       "tension": 0,
-      "pointRadius": 0,
-      "pointBackgroundColor": "#ee8939",
-      "pointHoverRadius": 3
+      "pointBackgroundColor": "#ee8939"
     }
   ],
   "labels": [
@@ -882,7 +921,7 @@
       "display": false
     },
     "title": {
-      "text": "sdfgsdfg",
+      "text": "fdajasdklf;alsdf",
       "display": true
     }
   },
@@ -936,7 +975,7 @@
       },
       "title": {
         "display": true,
-        "text": "adfgssf",
+        "text": "asdijfaskldfas",
         "padding": {
           "top": 4,
           "bottom": 4
@@ -959,6 +998,8 @@
         "color": "rgba(0,0,0,0.1)"
       },
       "ticks": {
+        "maxTicksLimit": 6,
+        "color": "#333",
         "minRotation": 0,
         "maxRotation": 50,
         "mirror": false,
@@ -975,8 +1016,7 @@
         "crossAlign": "near",
         "showLabelBackdrop": false,
         "backdropColor": "rgba(255, 255, 255, 0.75)",
-        "backdropPadding": 2,
-        "color": "#666"
+        "backdropPadding": 2
       },
       "type": "linear",
       "display": true,
@@ -995,7 +1035,7 @@
       },
       "title": {
         "display": true,
-        "text": "sdfgsdfgsdf",
+        "text": "asdjfl;sadfkasd",
         "padding": {
           "top": 4,
           "bottom": 4
@@ -1003,22 +1043,24 @@
         "color": "#666"
       },
       "id": "y",
-      "position": "left"
+      "position": "left",
+      "min": 100000
     }
   },
   "spanGaps": false
 };
 
         // Create chart with exact same configuration but remove redundant title
+        const hasMin = chartOptions?.scales?.y?.min !== undefined;
         const chart = new Chart(ctx, {
             type: 'line',
             data: chartData,
             options: {
                 ...chartOptions,
                 interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     ...chartOptions.plugins,
                     // Remove title from chart as it's now in the header
@@ -1048,16 +1090,17 @@
                     legend: {
                         display: true,
                         labels: {
-                                    boxWidth: 20,        // Width of the color box
-                                    boxHeight: 20,       // Height of the color box
-                                    usePointStyle: false, // Makes it more like a round dot or checkbox
-                                    pointStyle: 'rect', // Use 'circle', 'rect', 'rectRounded', 'cross', etc.
-                                    padding: 15,
-                                    color: '#333',       // Label text color
-                                    font: {
-                                    size: 12,
-                                    }
-                        }}
+                            boxWidth: 20,        // Width of the color box
+                            boxHeight: 20,       // Height of the color box
+                            usePointStyle: true, // Makes it more like a round dot or checkbox
+                            pointStyle: 'rect',  // Use 'circle', 'rect', 'rectRounded', 'cross', etc.
+                            padding: 15,
+                            color: '#333',       // Label text color
+                            font: {
+                                size: 12,
+                            }
+                        }
+                    }
                 },
                 scales: {
                     ...chartOptions.scales,
@@ -1070,20 +1113,19 @@
                         },
                         ticks: {
                             color: '#333'       // Optional: customize tick color
-                            }
+                        }
                     },
                     y: {
                         ...chartOptions.scales?.y,
-                         offset: true,
-                
+                        offset: hasMin,
                         grid: {
-                            
                             drawBorder: false     // ✅ Show tick marks
                         },
                         ticks: {
                             callback: function(value) {
                                 return formatIndianNumber(value);
                             },
+                            maxTicksLimit: 6,
                             color: '#333'       // Optional: customize tick color
                         }
                     }
@@ -1092,7 +1134,6 @@
             }
         });
 
-       
         
         // Function to filter chart data based on selected value
         function filterChartData() {
@@ -1217,7 +1258,7 @@
             const canvas = document.getElementById('myChart');
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'sdfgsdfg.png';
+            link.download = 'fdajasdklf;alsdf.png';
             link.href = image;
             link.click();
         });
