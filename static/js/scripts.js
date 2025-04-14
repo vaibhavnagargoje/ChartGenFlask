@@ -534,6 +534,8 @@ document.addEventListener('DOMContentLoaded', function() {
             currentChart = BarChartHandler.createBarChart(chartData, chartCanvas);
         } else if (selectedChartType === 'stackedBar') {
             currentChart = StackedBarChartHandler.createStackedBarChart(chartData, chartCanvas);
+        } else if (selectedChartType === 'percentStackedBar') {
+            currentChart = PercentStackedBarChartHandler.createPercentStackedBarChart(chartData, chartCanvas);
         } else {
             console.error('Unsupported chart type:', selectedChartType);
             alert('Unsupported chart type: ' + selectedChartType);
@@ -607,6 +609,8 @@ document.addEventListener('DOMContentLoaded', function() {
             BarChartHandler.updateBarChart(chartData, currentChart);
         } else if (selectedChartType === 'stackedBar') {
             StackedBarChartHandler.updateStackedBarChart(chartData, currentChart);
+        } else if (selectedChartType === 'percentStackedBar') {
+            PercentStackedBarChartHandler.updatePercentStackedBarChart(chartData, currentChart);
         }
     }
     
@@ -802,6 +806,11 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         } else if (selectedChartType === 'stackedBar') {
             html = StackedBarChartHandler.generateStackedBarChartHTML(
+                chartConfig, chartTitle, description, additionalInfo,
+                chartFilterColumn, chartFilterOptions, selectedFilterValue, preFilteredData
+            );
+        } else if (selectedChartType === 'percentStackedBar') {
+            html = PercentStackedBarChartHandler.generatePercentStackedBarChartHTML(
                 chartConfig, chartTitle, description, additionalInfo,
                 chartFilterColumn, chartFilterOptions, selectedFilterValue, preFilteredData
             );

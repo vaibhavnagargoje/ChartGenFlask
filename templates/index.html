@@ -148,6 +148,13 @@
                         </div>
                         <span>Stacked Bar Chart</span>
                     </div>
+                    
+                    <div class="chart-type-card" data-type="percentStackedBar">
+                        <div class="chart-icon">
+                            <svg viewBox="0 0 24 24"><path d="M3,16H6V14H3V16ZM3,12H6V10H3V12ZM3,8H6V6H3V8ZM7,16H10V14H7V16ZM7,12H10V10H7V12ZM7,8H10V6H7V8ZM11,16H14V14H11V16ZM11,12H14V10H11V12ZM11,8H14V6H11V8ZM15,16H18V14H15V16ZM15,12H18V10H15V12ZM15,8H18V6H15V8Z"></path><text x="18" y="18" font-size="6" font-weight="bold">%</text></svg>
+                        </div>
+                        <span>Percent Stacked Bar</span>
+                    </div>
                 </div>
                 <div class="chart-options">
                     <button id="generateChartBtn" class="action-btn">Generate Chart</button>
@@ -248,5 +255,6 @@
     <script src="{{ url_for('static', filename='js/line.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/stackedBar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/percentStackedBar.js') }}"></script>
 </body>
 </html>

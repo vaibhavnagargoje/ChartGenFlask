@@ -372,7 +372,7 @@ def apply_chart_filter():
 
 # Helper function to process chart data
 def process_chart_data(df, x_axis, y_axes, chart_type):
-    if chart_type in ['line', 'bar', 'stackedBar']:
+    if chart_type in ['line', 'bar', 'stackedBar', 'percentStackedBar']:
         if df.empty:
             return {'labels': [], 'datasets': []}
             
@@ -433,13 +433,20 @@ def process_chart_data(df, x_axis, y_axes, chart_type):
                     'barPercentage': 0.8,
                     'categoryPercentage': 0.8
                 })
-            elif chart_type == 'stackedBar':
+            elif chart_type in ['stackedBar', 'percentStackedBar']:
                 dataset.update({
                     'barPercentage': 0.9,
                     'categoryPercentage': 0.8
                 })
             
             chart_data['datasets'].append(dataset)
+        
+        # For percent stacked bar, convert to percentages
+        if chart_type == 'percentStackedBar':
+            chart_data['datasets'] = calculate_percentage_data(
+                chart_data['datasets'], 
+                chart_data['labels']
+            )
         
         # Make sure all values are JSON serializable 
         chart_data = convert_to_serializable(chart_data)
