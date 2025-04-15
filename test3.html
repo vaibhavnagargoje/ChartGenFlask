@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -1320,14 +1318,42 @@
   "spanGaps": false
 };
 
+        // Calculate fixed y-axis ticks for 6 values
+        function calculateFixedTicks(data) {
+            // Find min/max values in all datasets
+            let min = Infinity;
+            let max = -Infinity;
+            
+            data.datasets.forEach(dataset => {
+                dataset.data.forEach(val => {
+                    if (val !== null && val !== undefined && !isNaN(val)) {
+                        min = Math.min(min, val);
+                        max = Math.max(max, val);
+                    }
+                });
+            });
+            
+            // Add some padding and round to nice values
+            min = min === Infinity ? 0 : Math.floor(min * 0.9);
+            max = max === -Infinity ? 1000 : Math.ceil(max * 1.1);
+            
+            // Calculate step size for exactly 5 steps (6 ticks)
+            const stepSize = Math.ceil((max - min) / 5);
+            
+            // Adjust max to ensure exactly 6 ticks with this step size
+            max = min + (stepSize * 5);
+            
+            return {
+                min: min,
+                max: max,
+                stepSize: stepSize
+            };
+        }
+        
+        // Get tick configuration for the chart
+        const tickConfig = calculateFixedTicks(chartData);
+
         // Create chart with exact same configuration but remove redundant title
-        const hasMin = chartOptions?.scales?.y?.min !== undefined;
-        const targetTicks = 6;
-const min = 0;
-const max = 6;
-
-const stepSize = (max - min) / (targetTicks - 1);
-
         const chart = new Chart(ctx, {
             type: 'line',
             data: chartData,
@@ -1397,8 +1423,8 @@ const stepSize = (max - min) / (targetTicks - 1);
                     },
                     y: {
                         ...chartOptions.scales?.y,
-                         offset: hasMin,
-                  
+                        min: tickConfig.min,
+                        max: tickConfig.max,
                         grid: {
                             color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
 
@@ -1408,9 +1434,8 @@ const stepSize = (max - min) / (targetTicks - 1);
                             callback: function(value) {
                                 return formatIndianNumber(value);
                             },
-                            beginAtZero: true,
-                            stepSize: stepSize,
-                            maxTicksLimit: 6,
+                            stepSize: tickConfig.stepSize,
+                            count: 6,
                             color: '#333'       // Optional: customize tick color
                         }
                     }
@@ -1488,6 +1513,12 @@ const stepSize = (max - min) / (targetTicks - 1);
                     }
                 });
                 
+                // Recalculate y-axis ticks based on new data
+                const newTickConfig = calculateFixedTicks(chart.data);
+                chart.options.scales.y.min = newTickConfig.min;
+                chart.options.scales.y.max = newTickConfig.max;
+                chart.options.scales.y.ticks.stepSize = newTickConfig.stepSize;
+                
                 // Update the chart
                 chart.update();
             } catch (error) {
@@ -1500,6 +1531,13 @@ const stepSize = (max - min) / (targetTicks - 1);
                 chart.data.datasets.forEach((dataset, i) => {
                     dataset.data = originalChartData.datasets[i].data;
                 });
+                
+                // Recalculate y-axis ticks for the original data
+                const resetTickConfig = calculateFixedTicks(chart.data);
+                chart.options.scales.y.min = resetTickConfig.min;
+                chart.options.scales.y.max = resetTickConfig.max;
+                chart.options.scales.y.ticks.stepSize = resetTickConfig.stepSize;
+                
                 chart.update();
             }
         }

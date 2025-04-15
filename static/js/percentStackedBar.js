@@ -668,7 +668,7 @@ const PercentStackedBarChartHandler = {
                         min: 0,
                         max: 100,
                         grid: {
-                            drawBorder: false     // Show tick marks
+                            drawBorder: false,    // Show tick marks
                             color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
 
                         },
