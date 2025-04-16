@@ -459,14 +459,15 @@ const LineChartHandler = {
                          offset: hasMin,
                         grid: {
                             color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
-
                             drawBorder: false     // ✅ Show tick marks
                         },
                         ticks: {
                             callback: function(value) {
                                 return formatIndianNumber(value);
                             },
-                            maxTicksLimit: 6,
+                             precision: 0,  // No decimals
+                            maxTicksLimit: 7,  // Maximum 7 ticks
+    
                             color: '#333'       // Optional: customize tick color
                         }
                     }

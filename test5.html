@@ -1320,105 +1320,107 @@
   "spanGaps": false
 };
 
-        // Create chart with exact same configuration but remove redundant title
-        const hasMin = chartOptions?.scales?.y?.min !== undefined;
-        const targetTicks = 6;
-        const min = 0;
-        const max = 6;
+const hasMin = chartOptions?.scales?.y?.min !== undefined;
 
-        const stepSize = (max - min) / (targetTicks - 1);
 
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: chartData,
-            options: {
-                ...chartOptions,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
+
+
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+        ...chartOptions,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            ...chartOptions?.plugins,
+            title: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'white',
+                titleColor: 'black',
+                bodyColor: 'black',
+                animation: {
+                    duration: 50,
+                    easing: 'easeOutQuart'
                 },
-                plugins: {
-                    ...chartOptions.plugins,
-                    // Remove title from chart as it's now in the header
-                    title: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'white', // Yellow tooltip background
-                        titleColor: 'black',
-                        bodyColor: 'black',
-                        animation: {
-                            duration: 50, // milliseconds (default is 400)
-                            easing: 'easeOutQuart' // easing function
-                        },
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                
-                                if (context.parsed.y !== null && context.parsed.y !== undefined) {
-                                    label += formatIndianNumber(context.parsed.y);
-                                } else {
-                                    label += 'No data'; // For null values, show 'No data' in tooltip
-                                }
-                                return label;
-                            }
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
                         }
-                    },
-                    legend: {
-                        display: true,
-                        labels: {
-                            boxWidth: 20,        // Width of the color box
-                            boxHeight: 20,       // Height of the color box
-                            usePointStyle: true, // Makes it more like a round dot or checkbox
-                            pointStyle: 'rect',  // Use 'circle', 'rect', 'rectRounded', 'cross', etc.
-                            padding: 15,
-                            color: '#333',       // Label text color
-                            font: {
-                                size: 12,
-                            }
+                        
+                        if (context.parsed.y !== null && context.parsed.y !== undefined) {
+                            label += formatIndianNumber(context.parsed.y);
+                        } else {
+                            label += 'No data';
                         }
+                        return label;
                     }
-                },
-                scales: {
-                    ...chartOptions.scales,
-                    x: {
-                        ...chartOptions.scales?.x,
-                        offset: true,
-                        grid: {
-                            drawTicks: true,
-                            drawOnChartArea: false,
-                        },
-                        ticks: {
-                            color: '#333'       // Optional: customize tick color
-                        }
-                    },
-                    y: {
-                        ...chartOptions.scales?.y,
-                        offset: hasMin,
-                        grid: {
-                            color: 'rgba(0,0,0,0.06)', // Optional: customize grid color
-                            drawBorder: false     // ✅ Show tick marks
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return formatIndianNumber(value);
-                            },
-                            
-                            stepSize: stepSize,
-                            maxTicksLimit: 6,
-                            beginAtZero: true, // Wait, is this necessary?
-                            min: hasMin ? min : 0,
-                            color: '#333'       // Optional: customize tick color
-                        }
+                }
+            },
+            legend: {
+                display: true,
+                labels: {
+                    boxWidth: 20,
+                    boxHeight: 20,
+                    usePointStyle: true,
+                    pointStyle: 'rect',
+                    padding: 15,
+                    color: '#333',
+                    font: {
+                        size: 12,
                     }
-                },
-                spanGaps: false // Don't connect points across null values for line charts
+                }
             }
-        });
+        },
+        scales: {
+            ...chartOptions?.scales,
+            x: {
+                ...chartOptions?.scales?.x,
+                offset: true,
+                grid: {
+                    drawTicks: true,
+                    drawOnChartArea: false,
+                },
+                ticks: {
+                    color: '#333',                    
+                }
+            },
+            y: {
+                min: 0,
+                ...chartOptions?.scales?.y,
+                offset: hasMin,
+                grid: {
+                    color: 'rgba(0,0,0,0.06)',
+                    drawBorder: false
+                },
+                ticks: {
+                    callback: function(value) {
+                        // Only show whole numbers
+                        return Number.isInteger(value) ? formatIndianNumber(value) : '';
+                    },
 
+                    
+                    color: '#333',
+                    
+                   
+                    precision: 0,  // No decimals
+                    maxTicksLimit: 6,  // Maximum 7 ticks
+                    // count: 5,
+                }
+            }
+        },
+        spanGaps: false
+    }
+});
+
+// Rest of your original code (filterChartData, displayFilterMessage functions) remains the same
+// Rest of your code (filterChartData, displayFilterMessage functions remain the same)
         
         // Function to filter chart data based on selected value
         function filterChartData() {
