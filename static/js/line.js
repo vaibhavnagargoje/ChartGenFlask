@@ -55,8 +55,7 @@ const LineChartHandler = {
         
 
 
-        // Create chart with exact same configuration but remove redundant title
-        const hasMin = chartOptions?.scales?.y?.min !== undefined;
+        
         // Set chart configuration for line charts
         const config = {
             type: 'line',
@@ -81,7 +80,6 @@ const LineChartHandler = {
                         }
                     },
                     y: {
-                        offset: hasMin,
                         grid: {
                             drawBorder: false,
                         },
@@ -89,8 +87,8 @@ const LineChartHandler = {
                             callback: function(value) {
                                 return formatIndianNumber(value);
                             },
-                            precision: 0,  // No decimals
-                            maxTicksLimit: 7,  // Maximum 7 ticks
+                            precision: 0, 
+                            maxTicksLimit: 7,  
                             color: '#333',
 
                         }
@@ -461,6 +459,7 @@ const LineChartHandler = {
                         }
                     },
                     y: {
+                        min: 0,
                         ...chartOptions.scales?.y,
                          offset: hasMin,
                         grid: {
